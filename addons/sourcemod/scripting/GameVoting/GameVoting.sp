@@ -21,19 +21,25 @@ methodmap WorkingWithGameVoting
 	public void setId(int client, int value) {
 		gvdata[client][id] = value;
 	}
-	
+
 	public void setVb(int client, int value) {
 		#if defined PLUGIN_DEBUG
-			LogMessage("setVb(%d, %d), old_value: %d", client, value, gvdata[client][voteban_vote]);
+			LogMessage("setVb(%d, NEW_VALUE %d), OLD_VALUE: %d", client, value, gvdata[client][voteban_vote]);
 		#endif
 		gvdata[client][voteban_vote] = value;
 	}
 	
 	public void setVk(int client, int value) {
+		#if defined PLUGIN_DEBUG
+			LogMessage("setVk(%d, NEW_VALUE %d), OLD_VALUE: %d", client, value, gvdata[client][votekick_vote]);
+		#endif
 		gvdata[client][votekick_vote] = value;
 	}
 	
 	public void setVm(int client, int value) {
+		#if defined PLUGIN_DEBUG
+			LogMessage("setVm(%d, NEW_VALUE %d), OLD_VALUE: %d", client, value, gvdata[client][votemute_vote]);
+		#endif
 		gvdata[client][votemute_vote] = value;
 	}
 
@@ -61,8 +67,37 @@ methodmap WorkingWithGameVoting
 		gvdata[client][antispam] = value;
 	}
 	
+	public void mutestamp(int client, int value) {
+		gvdata[client][mutetime] = value;
+	}
+	
+	public int getmutestamp(int client) {
+		return gvdata[client][mutetime];
+	}
+	
+	public void silence(int client, bool value) {
+		gvdata[client][silenced] = value;
+	}
+	
+	public bool silenced(int client) {
+		return gvdata[client][silenced];
+	}
+	
 	public bool allowcmd(int client) {
 		if(this.getAs(client) < GetTime()) return true;
+		return false;
+	}
+	
+	public void setkickstamp(int client, int stamp){
+		gvdata[client][kicktime] = stamp;
+	}
+	
+	public int kickstamp(int client) {
+		return gvdata[client][kicktime];
+	}
+	
+	public bool mustkick(int client) {
+		if(this.kickstamp(client) > GetTime()) return true;
 		return false;
 	}
 	
@@ -77,15 +112,33 @@ methodmap WorkingWithGameVoting
 	{
 		this.setId(client, -1);
 		this.resetvotes(client);
+		this.setAs(client, 0);
+		this.silence(client, false);
+		this.mutestamp(client, 0);
 	}
 	
 	public void displaydata(int client) {
 		LogMessage("WorkingWithGameVoting.displaydata # Id(%i), Voteban(%i), Votekick(%i), Votemute(%i)", this.getId(client), this.getVb(client), this.getVk(client), this.getVm(client));
 	}
 	
-	public void checkkick(int client)
+	public void muteplayer(int client) {
+		this.silence(client, true);
+		this.mutestamp(client, (GetTime()+ cVmDelay.IntValue));
+		SetClientListeningFlags(client, VOICE_MUTED);
+	}
+	
+	public void checkother(int client)
 	{
 		// just check kick time
+		if(this.getmutestamp(client) > GetTime())
+		{
+			this.muteplayer(client);
+		}
+		
+		if(this.mustkick(client)) {
+			int diff = this.kickstamp(client)-GetTime();
+			KickClient(client, "Kicked by GameVoting. Wait %d sec",diff);
+		}
 	}
 	
 	public bool VoteEnabled(int client, int category) {
@@ -93,21 +146,21 @@ methodmap WorkingWithGameVoting
 		{
 			case SQL_VOTEBAN: 
 			{
-				if(!GetConVarBool(cVoteban)) {
+				if(!cVoteban.BoolValue) {
 					PrintToChat(client, "[%s] Admins disable voteban command.", CHAT_PREFIX);
 					return false;
 				}
 			}
 			case SQL_VOTEMUTE:
 			{
-				if(!GetConVarBool(cVotemute)) {
+				if(!cVotemute.BoolValue) {
 					PrintToChat(client, "[%s] Admins disable votemute command.", CHAT_PREFIX);
 					return false;
 				}
 			}
 			case SQL_VOTEKICK:
 			{
-				if(!GetConVarBool(cVotekick)) {
+				if(!cVotekick.BoolValue) {
 					PrintToChat(client, "[%s] Admins disable votekick command.", CHAT_PREFIX);
 					return false;
 				}
@@ -118,55 +171,22 @@ methodmap WorkingWithGameVoting
 	}
 	
 	public int numOfVotes(int client, int category) {
-		#if defined PLUGIN_DEBUG
-			//LogMessage("Parse players data - gid #%d", gid);
-			this.displaydata(client);
-		#endif
-	
 		int gid = 0;
 		gid = this.getId(client);
 		int result = 0;
-				
-		for(int i=0; i < MaxClients; ++i)
+		for(int i=0; i < GetMaxClients(); ++i)
 		{
 			if(player.valid(i))
 			{
 				#if defined PLUGIN_DEBUG
-					// analys
-					LogMessage("CLIENT: #%d | VICTIM_GID: #%d | VOTEBAN: #%d", i, this.getId(client), this.getVb(i));
+					LogMessage("CLIENT: #%d | VICTIM_GID: #%d | VOTEMUTE: #%d", i, this.getId(client), this.getVm(i));
 				#endif
 			
 				switch(category)
 				{
-					case SQL_VOTEBAN: 
-					{
-						if(this.getVb(i) == gid) 
-						{
-							result++;
-						}
-					}
-					case SQL_VOTEMUTE:
-					{
-						if(this.getVm(i) == gid) 
-						{
-							#if defined PLUGIN_DEBUG
-								//LogMessage("client#%d, votemute_vote#%d, searching for %d...", i, this.getVm(i), gid);
-							#endif
-							
-							result++;
-						}
-					}
-					case SQL_VOTEKICK:
-					{
-						if(this.getVk(i) == gid) 
-						{
-							#if defined PLUGIN_DEBUG
-								//LogMessage("client#%d, votekick_vote#%d, searching for %d...", i, this.getVk(i), gid);
-							#endif
-							
-							result++;
-						}
-					}
+					case SQL_VOTEBAN: if(this.getVb(i) == gid) result++;
+					case SQL_VOTEMUTE: if(this.getVm(i) == gid) result++;
+					case SQL_VOTEKICK: if(this.getVk(i) == gid) result++;
 				}
 			}
 		}
@@ -178,65 +198,117 @@ methodmap WorkingWithGameVoting
 		return result;
 	}
 	
+	public void setmute(int client, int delay) {
+		int timestamp = GetTime()+delay;
+		char steam[STEAM_SIZE];
+		char query[86];
+		steam = player.steam(client);
+		if(player.vsteam(steam)) {
+			Format(query, sizeof(query), SQL_MUTEPLAYER, timestamp, steam);
+
+			#if defined PLUGIN_DEBUG
+				LogMessage(query);
+			#endif
+
+			SQL_TQuery(GVDB, Empty_Callback, query, client, DBPrio_Normal); 
+		}
+	}
+
+	public void setkick(int client, int delay) {
+		int timestamp = GetTime()+delay;
+		char steam[STEAM_SIZE];
+		char query[86];
+		steam = player.steam(client);
+		if(player.vsteam(steam)) {
+			Format(query, sizeof(query), SQL_KICKPLAYER, timestamp, steam);
+
+			#if defined PLUGIN_DEBUG
+				LogMessage(query);
+			#endif
+
+			SQL_TQuery(GVDB, Empty_Callback, query, client, DBPrio_Normal); 
+		}
+	}
+	
+	
 	public void VoteFor(int client, int victim, int category)
 	{
 		//int gid = 0; gid = this.getId(client);
-		if(victim == -1 || !player.valid(victim) || client == victim) {
+		if(victim == -1 || client == victim) 
+		{
 			this.resetvotes(client);
 			PrintToChat(client, "Vote has been reset.");
-		} else {
+			LogMessage("CLIENT #%d | RESET VOTES.",client);
+		} 
+		else if(player.valid(victim))
+		{
 		
 		int vid = 0; 
 		vid = this.getId(victim);
-		if(vid != this.getVb(client)) {
+		if(vid != this.getVb(client)) 
+		{
 		
 		#if defined PLUGIN_DEBUG
-			LogMessage("Player %N voting for %N. (client:#%d,victim:#%d)", client, victim, this.getId(client), vid);
+			LogMessage("GV_ID_VICTIM:#%d | GV_ID_CLIENT:#%d (Player %N voting for %N.)", this.getId(client), vid, client, victim);
 		#endif
 
 		int needed = 0;
-		int votes = this.numOfVotes(victim, category);
-		
+		int votes = 0;
 		switch(category)
 		{
 			// COPYPAST!
 			case SQL_VOTEBAN: 
 			{
 				this.setVb(client, vid);
-				needed = ((player.num()*GetConVarInt(cVbPercent))/100);
+				needed = ((player.num() * cVbPercent.IntValue) / 100);
+				votes = this.numOfVotes(victim, category);
+				
 				if(votes < needed) PrintToChatAll("Player %N voted to ban %N (%d/%d)", client, victim, votes, needed );
 				else {
-					PrintToChatAll("Player %N was banned by GameVoting. (Reason: Justice of players)");
+					PrintToChatAll("Player %N was banned by GameVoting. (Reason: Justice of players)", victim);
+					player.ban(victim, client); 
 				}
 			}
 			case SQL_VOTEMUTE:
 			{
 				this.setVm(client, vid);
-				needed = ((player.num()*GetConVarInt(cVkPercent))/100);
+				needed = ((player.num()* cVkPercent.IntValue )/100);
+				votes = this.numOfVotes(victim, category);
+				
 				if(votes < needed) PrintToChatAll("Player %N voted to mute %N (%d/%d)", client, victim, votes, needed );
 				else {
-					PrintToChatAll("Player %N was muted by GameVoting.");
+					PrintToChatAll("Player %N was muted by GameVoting.", victim);
+					this.muteplayer(victim); 
 				}
 			}
 			case SQL_VOTEKICK:
 			{
 				this.setVk(client, vid);
-				needed = ((player.num()*GetConVarInt(cVmPercent))/100);
+				needed = ((player.num()* cVmPercent.IntValue )/100);
+				votes = this.numOfVotes(victim, category);
+				
 				if(votes < needed)
 					PrintToChatAll("Player %N voted to kick %N (%d/%d)", client, victim, votes, needed );
 				else {
-					PrintToChatAll("Player %N was kicked by GameVoting.");
+					PrintToChatAll("Player %N was kicked by GameVoting.", victim);
+					this.setkick(client, cVkDelay.IntValue);
+					KickClient(client, "Kicked by GameVoting. Wait %d sec",cVkDelay.IntValue);
+					// done
 				}
+
 			}
 		}
 		
-		}
+		} 
+		#if defined PLUGIN_DEBUG
+		else LogMessage("GV_ID_CLIENT == GV_ID_VICTIM;");
+		#endif
 		}
 	}
 	
 	public void FillPlayers(Menu handle, int client, int category) {
 		// detect exists vote
-		int existsvote = -1;
+		int existsvote = 0;
 		switch(category) {
 			case SQL_VOTEBAN: existsvote = this.getVb(client);
 			case SQL_VOTEKICK: existsvote = this.getVk(client);
@@ -251,7 +323,7 @@ methodmap WorkingWithGameVoting
 			{
 				// its exists vote
 				if(this.getId(i) == existsvote) {
-					Format(buff, sizeof(buff), "%N (voted)", i);
+					Format(buff, sizeof(buff), "%N (x)", i);
 					IntToString(i, num, sizeof(num));
 					AddMenuItem(handle, num, buff, ITEMDRAW_DEFAULT);
 				}

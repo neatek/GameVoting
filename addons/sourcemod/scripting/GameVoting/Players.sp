@@ -1,5 +1,10 @@
 methodmap WorkingWithPlayers
 {
+	public void ban(int client, int attacker)
+	{
+		ServerCommand("sm_ban #%d %d \"Player %N banned by Gamevoting (votecaller: %N)\"", GetClientUserId(client), GetConVarInt(cVbDelay), client, attacker);
+	}
+
 	public char steam(int client) {
 		char auth[STEAM_SIZE];
 		if(GetClientAuthId(client, AuthId_Engine, auth, sizeof(auth))) {
@@ -11,7 +16,7 @@ methodmap WorkingWithPlayers
 	
 	public bool valid(int client) 
 	{
-		if(!(1<= client<=MaxClients ) || !IsClientInGame(client)) 
+		if(!(1<= client<=MaxClients ) || !IsClientInGame(client) || IsClientSourceTV(client)) 
 			return false;
 
 		return true; 

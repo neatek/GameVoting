@@ -27,7 +27,9 @@ enum gvPlayers {
 	votemute_vote,
 	// other
 	antispam,
-	mutetime
+	mutetime,
+	kicktime,
+	bool:silenced
 }
 
 int gvdata[MAXPLAYERS+1][gvPlayers];

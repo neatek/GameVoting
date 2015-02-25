@@ -48,6 +48,11 @@ public RegPlayer_Callback(Handle:owner, Handle:query, const String:error[], any:
 	}
 }
 
+public Empty_Callback(Handle:owner, Handle:query, const String:error[], any:client)
+{
+	if(query == null) LogError("Empty_Callback Error: %s", error);
+}
+
 public LoadPlayer_Callback(Handle:owner, Handle:query, const String:error[], any:client)
 {
 	if(query == null) LogError("LoadPlayer_Callback Error: %s", error);
@@ -56,6 +61,8 @@ public LoadPlayer_Callback(Handle:owner, Handle:query, const String:error[], any
 			while(SQL_FetchRow(query)) {
 				int ggid = SQL_FetchInt(query, SQL_ID);
 				gv.setId(client, ggid);
+				gv.setkickstamp(client, SQL_FetchInt(query, SQL_KICKSTAMP));
+				gv.mutestamp(client, SQL_FetchInt(query, SQL_MUTESTAMP));
 				#if defined PLUGIN_DEBUG
 					LogMessage("LoadPlayer_Callback#%d",ggid);
 				#endif
@@ -69,5 +76,5 @@ public LoadPlayer_Callback(Handle:owner, Handle:query, const String:error[], any
 	
 	// after load data
 	gv.displaydata(client);
-	gv.checkkick(client);
+	gv.checkother(client);
 }
