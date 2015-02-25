@@ -1,0 +1,20 @@
+#define PLUGIN_DEBUG 1
+#define CHAT_PREFIX "GameVoting"
+#define STEAM_SIZE 32
+#define SQL_CONFIG "gamevoting"
+#define SQL_ID 0
+#define SQL_STEAM 1
+#define SQL_VOTEBAN 2
+#define SQL_VOTEKICK 3
+#define SQL_VOTEMUTE 4
+
+#define SQL_PLAYERS "CREATE TABLE IF NOT EXISTS `gv_cache` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `steam` TEXT NOT NULL UNIQUE, `kicktime` INTEGER, `mutetime` INTEGER );"
+#define SQL_GETPLAYER "SELECT * FROM `gv_cache` WHERE `steam` = '%s' LIMIT 1"
+#define SQL_REGPLAYER "INSERT INTO `gv_cache` (`id`, `steam`) VALUES (NULL, '%s')"
+
+#define VOTEBAN_CMD 	"!voteban"
+#define VOTEKICK_CMD 	"!votekick"
+#define VOTEMUTE_CMD 	"!votemute"
+
+#define CONTINUE Plugin_Continue
+#define HANDLED Plugin_Handled
