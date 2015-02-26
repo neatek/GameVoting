@@ -7,7 +7,7 @@ public Action:Listener(client, const String:command[], argc)
 			return HANDLED;
 		}
 		else {
-			
+			gv.unmuteplayer(client);
 			return CONTINUE;
 		}
 	}
@@ -23,6 +23,12 @@ public Action:Listener(client, const String:command[], argc)
 		return CONTINUE;
 	}
 
+	// admins on server
+	if(cAdmins.BoolValue && pAdmins) {
+		PrintToChat(client, "[%s] Admins disable this plugin.", CHAT_PREFIX);
+		return CONTINUE;
+	}
+	
 	// Antispam
 	if(!gv.allowcmd(client)) {
 		int sec = gv.getAs(client)-GetTime();
@@ -37,8 +43,29 @@ public Action:Listener(client, const String:command[], argc)
 	}
 
 	StripQuotes(word);
+	
+	PrintToConsole(client, "word: %s", word);
+
+	#if defined PLUGIN_DEBUG
+	if(StrEqual(word, "vmuteme"))
+	{
+		PrintToChat(client, "Mute you!");
+		gv.muteplayer(client);
+	}
+	else if(StrEqual(word, "vkickme"))
+	{
+		PrintToChat(client, "Kick you!");
+		gv.setkick(client, 5);
+	}
+	else if(StrEqual(word, "vbanme"))
+	{
+		PrintToChat(client, "Ban you!");
+		player.ban(client, 0); 
+	}
+	#endif
+
 	Menu GVMENU;
-	int category = -1;
+	int category = 0;
 	// Build menu, menu title
 	if(StrEqual(word, VOTEBAN_CMD) || StrEqual(word, "voteban"))
 	{

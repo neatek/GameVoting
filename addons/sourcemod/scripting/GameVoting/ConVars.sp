@@ -2,8 +2,12 @@ Plugin_ConVars() {
 	// general
 	cVersion  	= CreateConVar("gamevoting_version",	"1.7",	"Version of gamevoting plugin. Author: Neatek, www.neatek.ru", FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_REPLICATED|FCVAR_NOTIFY );
 	cEnable  	= CreateConVar("gamevoting_enable",		"1",	"Enable or disable plugin (def:1)", _, true, 0.0, true, 1.0);
+	cLogs  		= CreateConVar("gamevoting_logs",		"1",	"Enable or disable logs for plugin (def:1)", _, true, 0.0, true, 1.0);
+	cProgress  	= CreateConVar("gamevoting_progress",	"1",	"Do you want to log voting progress? (def:1)", _, true, 0.0, true, 1.0);
+	cAdmins  	= CreateConVar("gamevoting_autodisable","0",	"Disable plugin when admins on server? (def:0)", _, true, 0.0, true, 1.0);
 	cDelay		= CreateConVar("gamevoting_delay",		"10",	"Delay before vote again for other player (def:10)", _, true, 0.0, true, 120.0);
 	cMinimum 	= CreateConVar("gamevoting_players",	"4",	"Minimum players need to enable votes (def:4)", _, true, 0.0, true, 20.0);
+	cAuth 		= CreateConVar("gamevoting_authid",		"1",	"AuthID type, 1 - AuthId_Engine, 2 - AuthId_Steam2, 3 - AuthId_Steam3, 4 - AuthId_SteamID64 (def:1)", _, true, 1.0, true, 4.0);
 	// functional control
 	cVoteban 	= CreateConVar("gamevoting_voteban",	"1",	"Enable or disable voteban functional (def:1)", _, true, 0.0, true, 1.0);
 	cVotekick 	= CreateConVar("gamevoting_votekick",	"1",	"Enable or disable votekick (def:1)", _, true, 0.0, true, 1.0);

@@ -4,6 +4,10 @@ ConVar cVersion;
 ConVar cEnable;
 ConVar cDelay;
 ConVar cMinimum;
+ConVar cAuth;
+ConVar cLogs;
+ConVar cAdmins;
+ConVar cProgress;
 
 ConVar cVoteban;
 ConVar cVotekick;
@@ -34,3 +38,5 @@ enum gvPlayers {
 
 int gvdata[MAXPLAYERS+1][gvPlayers];
 bool pEnabled = false;
+bool pAdmins = false;
+char LogFilePath[128];

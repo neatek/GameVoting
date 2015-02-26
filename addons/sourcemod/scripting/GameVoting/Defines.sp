@@ -1,4 +1,4 @@
-#define PLUGIN_DEBUG 1
+//#define PLUGIN_DEBUG 1
 #define CHAT_PREFIX "GameVoting"
 #define STEAM_SIZE 32
 #define SQL_CONFIG "gamevoting"

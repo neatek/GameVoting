@@ -15,30 +15,35 @@
 	VoteFor(int client, int victim, int category)
 	int numOfVotes(int client, int category)
 */
-
 methodmap WorkingWithGameVoting
 {
 	public void setId(int client, int value) {
 		gvdata[client][id] = value;
 	}
 
+	public char getDate() {
+		char ftime[24];
+		FormatTime(ftime, sizeof(ftime), "[%H-%M-%S]",  GetTime());
+		return ftime;
+	}
+	
 	public void setVb(int client, int value) {
 		#if defined PLUGIN_DEBUG
-			LogMessage("setVb(%d, NEW_VALUE %d), OLD_VALUE: %d", client, value, gvdata[client][voteban_vote]);
+			//LogMessage("setVb(%d, NEW_VALUE %d), OLD_VALUE: %d", client, value, gvdata[client][voteban_vote]);
 		#endif
 		gvdata[client][voteban_vote] = value;
 	}
-	
+
 	public void setVk(int client, int value) {
 		#if defined PLUGIN_DEBUG
-			LogMessage("setVk(%d, NEW_VALUE %d), OLD_VALUE: %d", client, value, gvdata[client][votekick_vote]);
+			//LogMessage("setVk(%d, NEW_VALUE %d), OLD_VALUE: %d", client, value, gvdata[client][votekick_vote]);
 		#endif
 		gvdata[client][votekick_vote] = value;
 	}
 	
 	public void setVm(int client, int value) {
 		#if defined PLUGIN_DEBUG
-			LogMessage("setVm(%d, NEW_VALUE %d), OLD_VALUE: %d", client, value, gvdata[client][votemute_vote]);
+			//LogMessage("setVm(%d, NEW_VALUE %d), OLD_VALUE: %d", client, value, gvdata[client][votemute_vote]);
 		#endif
 		gvdata[client][votemute_vote] = value;
 	}
@@ -122,9 +127,24 @@ methodmap WorkingWithGameVoting
 	}
 	
 	public void muteplayer(int client) {
-		this.silence(client, true);
-		this.mutestamp(client, (GetTime()+ cVmDelay.IntValue));
-		SetClientListeningFlags(client, VOICE_MUTED);
+		if(player.valid(client)) {
+			PrintToChatAll("Player %N was muted by GameVoting.", client);
+			PrintToChat(client, "[%s] You was muted.", CHAT_PREFIX);
+			this.silence(client, true);
+			this.mutestamp(client, (GetTime()+ cVmDelay.IntValue));
+			SetClientListeningFlags(client, VOICE_MUTED);	
+			if(cLogs.BoolValue) LogToFile(LogFilePath, "Player %N(%s) was muted.",  client, player.steam(client));
+		}
+	}
+	
+	public void unmuteplayer(int client) {
+		if(player.valid(client)) {
+			PrintToChat(client, "[%s] You was unmuted.", CHAT_PREFIX);
+			this.silence(client, false);
+			this.mutestamp(client, 0);
+			SetClientListeningFlags(client, VOICE_NORMAL);
+			if(cLogs.BoolValue) LogToFile(LogFilePath, "Player %N(%s) was unmuted.", client, player.steam(client));
+		}
 	}
 	
 	public void checkother(int client)
@@ -138,6 +158,7 @@ methodmap WorkingWithGameVoting
 		if(this.mustkick(client)) {
 			int diff = this.kickstamp(client)-GetTime();
 			KickClient(client, "Kicked by GameVoting. Wait %d sec",diff);
+			if(cLogs.BoolValue) LogToFile(LogFilePath, "Player %N(%s) was autokicked. Need to wait %d before connect.",  client, player.steam(client), diff);
 		}
 	}
 	
@@ -169,7 +190,7 @@ methodmap WorkingWithGameVoting
 		
 		return true;
 	}
-	
+
 	public int numOfVotes(int client, int category) {
 		int gid = 0;
 		gid = this.getId(client);
@@ -179,7 +200,7 @@ methodmap WorkingWithGameVoting
 			if(player.valid(i))
 			{
 				#if defined PLUGIN_DEBUG
-					LogMessage("CLIENT: #%d | VICTIM_GID: #%d | VOTEMUTE: #%d", i, this.getId(client), this.getVm(i));
+					//LogMessage("CLIENT: #%d | VICTIM_GID: #%d | VOTEMUTE: #%d", i, this.getId(client), this.getVm(i));
 				#endif
 			
 				switch(category)
@@ -215,22 +236,27 @@ methodmap WorkingWithGameVoting
 	}
 
 	public void setkick(int client, int delay) {
-		int timestamp = GetTime()+delay;
-		char steam[STEAM_SIZE];
-		char query[86];
-		steam = player.steam(client);
-		if(player.vsteam(steam)) {
-			Format(query, sizeof(query), SQL_KICKPLAYER, timestamp, steam);
+		if(delay > 0) {
+			int timestamp = GetTime()+delay;
+			char steam[STEAM_SIZE];
+			char query[86];
+			steam = player.steam(client);
+			if(player.vsteam(steam)) {
+				Format(query, sizeof(query), SQL_KICKPLAYER, timestamp, steam);
 
-			#if defined PLUGIN_DEBUG
-				LogMessage(query);
-			#endif
+				#if defined PLUGIN_DEBUG
+					LogMessage(query);
+				#endif
 
-			SQL_TQuery(GVDB, Empty_Callback, query, client, DBPrio_Normal); 
+				SQL_TQuery(GVDB, Empty_Callback, query, client, DBPrio_Normal); 
+
+				PrintToChatAll("Player %N was kicked by GameVoting.", client);
+				if(cLogs.BoolValue) LogToFile(LogFilePath, "Player %N(%s) was kicked.", client, player.steam(client));
+				KickClient(client, "Kicked by GameVoting. Wait %d sec",cVkDelay.IntValue);
+			}
 		}
 	}
-	
-	
+
 	public void VoteFor(int client, int victim, int category)
 	{
 		//int gid = 0; gid = this.getId(client);
@@ -238,7 +264,7 @@ methodmap WorkingWithGameVoting
 		{
 			this.resetvotes(client);
 			PrintToChat(client, "Vote has been reset.");
-			LogMessage("CLIENT #%d | RESET VOTES.",client);
+			//LogMessage("CLIENT #%d | RESET VOTES.",client);
 		} 
 		else if(player.valid(victim))
 		{
@@ -249,7 +275,7 @@ methodmap WorkingWithGameVoting
 		{
 		
 		#if defined PLUGIN_DEBUG
-			LogMessage("GV_ID_VICTIM:#%d | GV_ID_CLIENT:#%d (Player %N voting for %N.)", this.getId(client), vid, client, victim);
+			//LogMessage("GV_ID_VICTIM:#%d | GV_ID_CLIENT:#%d (Player %N voting for %N.)", this.getId(client), vid, client, victim);
 		#endif
 
 		int needed = 0;
@@ -262,11 +288,18 @@ methodmap WorkingWithGameVoting
 				this.setVb(client, vid);
 				needed = ((player.num() * cVbPercent.IntValue) / 100);
 				votes = this.numOfVotes(victim, category);
-				
-				if(votes < needed) PrintToChatAll("Player %N voted to ban %N (%d/%d)", client, victim, votes, needed );
+				if(votes < needed) {
+					PrintToChatAll("Player %N voted to ban %N (%d/%d)", client, victim, votes, needed );
+					
+					if(cProgress.BoolValue) 
+						if(cLogs.BoolValue)
+							LogToFile(LogFilePath, "Player %N(%s) voted for ban %N(%s) (%d/%d)",client, player.steam(client), victim, player.steam(victim), votes, needed);
+				}
 				else {
-					PrintToChatAll("Player %N was banned by GameVoting. (Reason: Justice of players)", victim);
 					player.ban(victim, client); 
+					
+					if(cLogs.BoolValue) 
+						LogToFile(LogFilePath, "Player %N(%s) was banned by voting for %d minutes.",  client, player.steam(client), cVbDelay.IntValue);
 				}
 			}
 			case SQL_VOTEMUTE:
@@ -274,11 +307,15 @@ methodmap WorkingWithGameVoting
 				this.setVm(client, vid);
 				needed = ((player.num()* cVkPercent.IntValue )/100);
 				votes = this.numOfVotes(victim, category);
-				
-				if(votes < needed) PrintToChatAll("Player %N voted to mute %N (%d/%d)", client, victim, votes, needed );
+				if(votes < needed) {
+					PrintToChatAll("Player %N voted to mute %N (%d/%d)", client, victim, votes, needed );
+					
+					if(cProgress.BoolValue) 
+						if(cLogs.BoolValue) 
+							LogToFile(LogFilePath, "Player %N(%s) voted for mute %N(%s) (%d/%d)",  client, player.steam(client), victim, player.steam(victim), votes, needed);
+				}
 				else {
-					PrintToChatAll("Player %N was muted by GameVoting.", victim);
-					this.muteplayer(victim); 
+					this.muteplayer(victim);
 				}
 			}
 			case SQL_VOTEKICK:
@@ -287,21 +324,24 @@ methodmap WorkingWithGameVoting
 				needed = ((player.num()* cVmPercent.IntValue )/100);
 				votes = this.numOfVotes(victim, category);
 				
-				if(votes < needed)
+				if(votes < needed) {
 					PrintToChatAll("Player %N voted to kick %N (%d/%d)", client, victim, votes, needed );
-				else {
-					PrintToChatAll("Player %N was kicked by GameVoting.", victim);
-					this.setkick(client, cVkDelay.IntValue);
-					KickClient(client, "Kicked by GameVoting. Wait %d sec",cVkDelay.IntValue);
-					// done
+					
+					if(cProgress.BoolValue) 
+						if(cLogs.BoolValue) 
+							LogToFile(LogFilePath, "Player %N(%s) voted for kick %N(%s) (%d/%d)", client, player.steam(client), victim, player.steam(victim), votes, needed);
+					//if(cLogs.BoolValue) LogToFile(LogFilePath, "[%s] Player %N(%s) voted for kick %N(%s) (%d/%d)", this.getDate(), client, player.steam(client), victim, player.steam(victim), votes, needed);
 				}
-
+				else {
+					this.setkick(client, cVkDelay.IntValue);
+					
+				}
 			}
 		}
 		
 		} 
 		#if defined PLUGIN_DEBUG
-		else LogMessage("GV_ID_CLIENT == GV_ID_VICTIM;");
+		//else LogMessage("GV_ID_CLIENT == GV_ID_VICTIM;");
 		#endif
 		}
 	}
