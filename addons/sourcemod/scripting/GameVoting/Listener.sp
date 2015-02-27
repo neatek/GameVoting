@@ -3,7 +3,21 @@ public Action:Listener(client, const String:command[], argc)
 	if(gv.silenced(client)) {
 		int diff = gv.getmutestamp(client)-GetTime();
 		if(diff > 0) {
-			PrintCenterText(client,"You will be unmuted after: %d sec (GameVoting)",diff);
+			if(!cGag.BoolValue) {
+				PrintCenterText(client,"You will be unmuted after: %d sec (GameVoting)",diff);
+				PrintToChat(client, "You will be unmuted after: %d sec (GameVoting)",diff);
+			} 
+			else {
+				if(gv.silenced(client) && !gv.muted(client)) {
+					PrintCenterText(client,"You will be ungagged after: %d sec (GameVoting)",diff);
+					PrintToChat(client, "You will be ungagged after: %d sec (GameVoting)",diff);
+				}
+				else {
+					PrintCenterText(client,"You will be unmuted after: %d sec (GameVoting)",diff);
+					PrintToChat(client, "You will be unmuted after: %d sec (GameVoting)",diff);
+				}
+			}
+			
 			return HANDLED;
 		}
 		else {
@@ -14,7 +28,8 @@ public Action:Listener(client, const String:command[], argc)
 
 	char word[24];
 	GetCmdArgString(word, sizeof(word));
-	if((word[1] == '!' && word[2] == 'v') || word[1] == 'v') {
+	//(word[1] == '!' && word[2] == 'v') || 
+	if(word[1] == 'v' && word[2] == 'o') {
 	String_ToLower(word,word,sizeof(word));
 	if(strlen(word) > 11) return CONTINUE;
 	
@@ -38,7 +53,7 @@ public Action:Listener(client, const String:command[], argc)
 
 	// Check minimum players
 	if(player.num() < cMinimum.IntValue) {
-		PrintToChat(client, "[%s] Sorry, but need %d more players for votes.", CHAT_PREFIX, cMinimum.IntValue);
+		PrintToChat(client, "[%s] Sorry, but need more than %d players for votes.", CHAT_PREFIX, (cMinimum.IntValue-1));
 		return CONTINUE;
 	}
 
@@ -47,17 +62,17 @@ public Action:Listener(client, const String:command[], argc)
 	PrintToConsole(client, "word: %s", word);
 
 	#if defined PLUGIN_DEBUG
-	if(StrEqual(word, "vmuteme"))
+	if(StrEqual(word, "vomuteme"))
 	{
 		PrintToChat(client, "Mute you!");
-		gv.muteplayer(client);
+		gv.muteplayer(client, (GetTime()+ cVmDelay.IntValue));
 	}
-	else if(StrEqual(word, "vkickme"))
+	else if(StrEqual(word, "vokickme"))
 	{
 		PrintToChat(client, "Kick you!");
 		gv.setkick(client, 5);
 	}
-	else if(StrEqual(word, "vbanme"))
+	else if(StrEqual(word, "vobanme"))
 	{
 		PrintToChat(client, "Ban you!");
 		player.ban(client, 0); 
@@ -67,7 +82,7 @@ public Action:Listener(client, const String:command[], argc)
 	Menu GVMENU;
 	int category = 0;
 	// Build menu, menu title
-	if(StrEqual(word, VOTEBAN_CMD) || StrEqual(word, "voteban"))
+	if(StrEqual(word, "voteban"))
 	{
 		if(!gv.VoteEnabled(client,SQL_VOTEBAN)) {
 			if(GVMENU != null) CloseHandle(GVMENU);
@@ -78,7 +93,7 @@ public Action:Listener(client, const String:command[], argc)
 		SetMenuTitle(GVMENU, "GameVoting - Voteban");
 		category = SQL_VOTEBAN;
 	}
-	else if(StrEqual(word, VOTEKICK_CMD) || StrEqual(word, "votekick"))
+	else if(StrEqual(word, "votekick"))
 	{
 		if(!gv.VoteEnabled(client,SQL_VOTEKICK)) {
 			if(GVMENU != null) CloseHandle(GVMENU);
@@ -89,7 +104,7 @@ public Action:Listener(client, const String:command[], argc)
 		SetMenuTitle(GVMENU, "GameVoting - Votekick");
 		category = SQL_VOTEKICK;
 	}
-	else if (StrEqual(word, VOTEMUTE_CMD) || StrEqual(word, "votemute"))
+	else if (StrEqual(word, "votemute"))
 	{
 		if(!gv.VoteEnabled(client,SQL_VOTEMUTE)) {
 			if(GVMENU != null) CloseHandle(GVMENU);
@@ -99,6 +114,17 @@ public Action:Listener(client, const String:command[], argc)
 		GVMENU = CreateMenu(MenuHandler_Votemute, MenuAction:MENU_NO_PAGINATION);
 		SetMenuTitle(GVMENU, "GameVoting - Votemute");
 		category = SQL_VOTEMUTE;
+	}	
+	else if (StrEqual(word, "votegag"))
+	{
+		if(!gv.VoteEnabled(client,SQL_VOTEGAG)) {
+			if(GVMENU != null) CloseHandle(GVMENU);
+			return CONTINUE;
+		}
+		
+		GVMENU = CreateMenu(MenuHandler_Votegag, MenuAction:MENU_NO_PAGINATION);
+		SetMenuTitle(GVMENU, "GameVoting - Votegag");
+		category = SQL_VOTEGAG;
 	}
 
 	if(GVMENU != null) {
@@ -107,7 +133,7 @@ public Action:Listener(client, const String:command[], argc)
 
 		// Fill menu by players
 		gv.FillPlayers(GVMENU, client, category);
-		DisplayMenu(GVMENU, client, 30);
+		DisplayMenu(GVMENU, client, cMenuDelay.IntValue);
 		gv.setAs(client, GetTime()+ cDelay.IntValue); // antispam
 		return HANDLED;
 

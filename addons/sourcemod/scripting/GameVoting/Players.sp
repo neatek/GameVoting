@@ -6,6 +6,15 @@ methodmap WorkingWithPlayers
 		return false;
 	}
 
+	public bool immunity(int client)
+	{
+		AdminId adminclient = GetUserAdmin(client);
+		if(adminclient == INVALID_ADMIN_ID) return false;
+		if(GetAdminFlag(adminclient, ImmunityFlag, Access_Real)) return true;
+		if(GetAdminFlag(adminclient, ImmunityFlag, Access_Effective)) return true;
+		return false;
+	}
+	
 	public void ban(int client, int attacker)
 	{
 		if(attacker > 0) {
@@ -33,8 +42,13 @@ methodmap WorkingWithPlayers
 	
 	public bool valid(int client) 
 	{
+		#if defined PLUGIN_DEBUG
 		if(!(1<= client<=MaxClients ) || !IsClientInGame(client) || IsClientSourceTV(client)) 
 			return false;
+		#else
+		if(!(1<= client<=MaxClients ) || !IsClientInGame(client) || IsClientSourceTV(client) || IsFakeClient(client)) 
+			return false;
+		#endif
 
 		return true; 
 	}

@@ -12,13 +12,13 @@
 public OnPluginStart()
 {
 	db.connect();
-	
 	Plugin_ConVars();
 	GVInitLog();
-
+	LoadImmunityFlags();
 	AddCommandListener(Listener, SAYCMD);
 	AddCommandListener(Listener, SAYCMD2);
 	HookEvent("player_death", PlayerDeath_Event);
+	//OnPluginReload();
 }
 
 public OnMapStart() {
@@ -35,10 +35,12 @@ public Action:PlayerDeath_Event(Handle:event, const String:name[], bool:dontBroa
 		if(diff > 0) PrintCenterText(client,"You will be unmuted after: %d sec (GameVoting)",diff);
 		else gv.unmuteplayer(client);
 	}
-	
-	//int attacker = GetClientOfUserId(GetEventInt(event, "attacker"));
-	//gv.VoteFor(client, attacker, SQL_VOTEMUTE);
-	//gv.numOfVotes(client, SQL_VOTEBAN);
+
+	#if defined PLUGIN_DEBUG
+	int attacker = GetClientOfUserId(GetEventInt(event, "attacker"));
+	gv.VoteFor(client, attacker, SQL_VOTEGAG);
+	gv.numOfVotes(client, SQL_VOTEGAG);
+	#endif
 }
 
 public OnClientPostAdminCheck(int client) {

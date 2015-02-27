@@ -3,7 +3,7 @@ methodmap WorkingWithDatabase
 	public void regplayer(int client)
 	{
 		#if defined PLUGIN_DEBUG
-			LogMessage("gv.regplayer(%d)", client);
+			LogMessage("db.regplayer(%d)", client);
 		#endif
 		char steam[STEAM_SIZE];
 		char query[86];
@@ -18,12 +18,44 @@ methodmap WorkingWithDatabase
 			SQL_TQuery(GVDB, RegPlayer_Callback, query, client, DBPrio_Normal); 
 		}
 	}
+	
+	public void mutestamp(int client, int timestamp)
+	{
+		char steam[STEAM_SIZE];
+		char query[86];
+		steam = player.steam(client);
+		if(player.vsteam(steam)) {
+			Format(query, sizeof(query), SQL_MUTEPLAYER, timestamp, steam);
+
+			#if defined PLUGIN_DEBUG
+				LogMessage(query);
+			#endif
+
+			SQL_TQuery(GVDB, Empty_Callback, query, client, DBPrio_Normal); 
+		}
+	}
+
+	public void gagstamp(int client, int timestamp)
+	{
+		char steam[STEAM_SIZE];
+		char query[86];
+		steam = player.steam(client);
+		if(player.vsteam(steam)) {
+			Format(query, sizeof(query), SQL_GAGPLAYER, timestamp, steam);
+
+			#if defined PLUGIN_DEBUG
+				LogMessage(query);
+			#endif
+
+			SQL_TQuery(GVDB, Empty_Callback, query, client, DBPrio_Normal); 
+		}
+	}
 
 	public void loadplayer(int client) {
 		gv.reset(client);
 		
 		#if defined PLUGIN_DEBUG
-			LogMessage("gv.loadplayer(%d)", client);
+			LogMessage("db.loadplayer(%d)", client);
 		#endif
 
 		char steam[STEAM_SIZE];

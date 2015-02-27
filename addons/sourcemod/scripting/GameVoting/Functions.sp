@@ -19,6 +19,26 @@ String_ToLower(const String:input[], String:output[], size)
 	output[x] = '\0';
 }
 
+LoadImmunityFlags() {
+	new String:ichar[11];
+	cImmunityf.GetString(ichar,sizeof(ichar));
+	if(BitToFlag(ReadFlagString(ichar), ImmunityFlag))
+		// hide admins with this flag
+		//cImmunity.SetString("0", true, true);
+		hideAdmins = true;
+	else // else display all admins
+		//cImmunity.SetString("1", true, true);
+		hideAdmins = false;
+}
+
+CacheMutestamp(int client, int time) {
+	db.mutestamp(client,time);
+}
+
+CacheGagstamp(int client, int time) {
+	db.gagstamp(client,time);
+}
+
 GVInitLog() {
 	char ftime[32];
 	FormatTime(ftime, sizeof(ftime), "logs/gv%m-%d.txt",  GetTime());

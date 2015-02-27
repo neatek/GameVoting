@@ -37,9 +37,31 @@ public MenuHandler_Votemute(Handle:menu, MenuAction:action, client, param2)
 	}
 }
 
+public MenuHandler_Votegag(Handle:menu, MenuAction:action, client, param2)
+{
+	if(action == MenuAction_End) CloseHandle(menu);
+	else if(action == MenuAction_Select) 
+	{
+		char victim[11]; int vicint;
+		GetMenuItem(menu, param2, victim, sizeof(victim));
+		vicint = StringToInt(victim);
+		gv.VoteFor(client, vicint, SQL_VOTEGAG);
+	}
+}
+
 /*
 	Database callbacks
 */
+public KickCallback(Handle:owner, Handle:query, const String:error[], any:client)
+{
+	if(query == null) LogError("RegPlayer_Callback Error: %s", error);
+	else {
+		KickClient(client, "Kicked by GameVoting. Wait %d sec",cVkDelay.IntValue);
+		PrintToChatAll("Player %N was kicked by GameVoting.", client);
+		if(cLogs.BoolValue) LogToFile(LogFilePath, "Player %N(%s) was kicked.", client, player.steam(client));
+	}
+}
+
 public RegPlayer_Callback(Handle:owner, Handle:query, const String:error[], any:client)
 {
 	if(query == null) LogError("RegPlayer_Callback Error: %s", error);
@@ -63,6 +85,7 @@ public LoadPlayer_Callback(Handle:owner, Handle:query, const String:error[], any
 				gv.setId(client, ggid);
 				gv.setkickstamp(client, SQL_FetchInt(query, SQL_KICKSTAMP));
 				gv.mutestamp(client, SQL_FetchInt(query, SQL_MUTESTAMP));
+				gv.gagstamp(client, SQL_FetchInt(query, SQL_GAGSTAMP));
 				#if defined PLUGIN_DEBUG
 					LogMessage("LoadPlayer_Callback#%d",ggid);
 				#endif
