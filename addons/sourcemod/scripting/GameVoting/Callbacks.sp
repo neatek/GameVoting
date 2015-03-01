@@ -54,20 +54,24 @@ public MenuHandler_Votegag(Handle:menu, MenuAction:action, client, param2)
 */
 public KickCallback(Handle:owner, Handle:query, const String:error[], any:client)
 {
-	if(query == null) LogError("RegPlayer_Callback Error: %s", error);
+	if(query == null) LogError("KickCallback Error: %s", error);
 	else {
-		KickClient(client, "Kicked by GameVoting. Wait %d sec",cVkDelay.IntValue);
-		PrintToChatAll("Player %N was kicked by GameVoting.", client);
-		if(cLogs.BoolValue) LogToFile(LogFilePath, "Player %N(%s) was kicked.", client, player.steam(client));
+		if(player.valid(client)) {
+			KickClient(client, "Kicked by GameVoting. Wait %d sec",cVkDelay.IntValue);
+			PrintToChatAll("Player %N was kicked by GameVoting.", client);
+			if(cLogs.BoolValue) LogToFile(LogFilePath, "Player %N(%s) was kicked.", client, player.steam(client));
+		}
 	}
 }
 
 public RegPlayer_Callback(Handle:owner, Handle:query, const String:error[], any:client)
 {
-	if(query == null) LogError("RegPlayer_Callback Error: %s", error);
-	else {
+	//if(query == null) LogError("RegPlayer_Callback Error: %s", error);
+	//else {
+	if(player.valid(client)) {
 		db.loadplayer(client);
 	}
+	//}
 }
 
 public Empty_Callback(Handle:owner, Handle:query, const String:error[], any:client)
@@ -93,7 +97,9 @@ public LoadPlayer_Callback(Handle:owner, Handle:query, const String:error[], any
 		}
 		else 
 		{
-			db.regplayer(client);
+			if(player.valid(client)) {
+				db.regplayer(client);
+			}
 		}
 	}
 	

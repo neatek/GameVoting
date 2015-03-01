@@ -43,14 +43,12 @@ methodmap WorkingWithPlayers
 	public bool valid(int client) 
 	{
 		#if defined PLUGIN_DEBUG
-		if(!(1<= client<=MaxClients ) || !IsClientInGame(client) || IsClientSourceTV(client)) 
-			return false;
+		if(0 < client <= MaxClients && IsClientInGame(client) && IsClientConnected(client) && !IsClientSourceTV(client)) return true;
 		#else
-		if(!(1<= client<=MaxClients ) || !IsClientInGame(client) || IsClientSourceTV(client) || IsFakeClient(client)) 
-			return false;
+		if(0 < client <= MaxClients && IsClientInGame(client) && IsClientConnected(client) && !IsFakeClient(client) && !IsClientSourceTV(client)) return true;
 		#endif
 
-		return true; 
+		return false; 
 	}
 	
 	public bool vsteam(char steam[STEAM_SIZE]) {
