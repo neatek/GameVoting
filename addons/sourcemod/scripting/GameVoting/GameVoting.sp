@@ -79,6 +79,17 @@ methodmap WorkingWithGameVoting
 	public void setVg(int client, int value) {
 		gvdata[client][votegag_vote] = value;
 	}
+
+	public void setVbReason(int client, int value) {
+		#if defined PLUGIN_DEBUG
+		LogMessage("CLIENT: %i, SET VALUE: %i",client,value);
+		#endif
+		gvdata[client][voteban_reason] = value;
+	}
+	
+	public int getVbReason(int client) {
+		return gvdata[client][voteban_reason];
+	}
 	
 	public void mutestamp(int client, int value) {
 		gvdata[client][mutetime] = value;
@@ -138,7 +149,7 @@ methodmap WorkingWithGameVoting
 		this.silence(client, false);
 		this.mutestamp(client, 0);
 	}
-	
+
 	public void displaydata(int client) {
 		LogMessage("WorkingWithGameVoting.displaydata # Id(%i), Voteban(%i), Votekick(%i), Votemute(%i)", this.getId(client), this.getVb(client), this.getVk(client), this.getVm(client));
 	}
@@ -175,6 +186,8 @@ methodmap WorkingWithGameVoting
 			if(cLogs.BoolValue) LogToFile(LogFilePath, "Player %N(%s) was gagged.",  client, player.steam(client));
 		}
 	}
+
+
 	
 	public void ungagplayer(int client) {
 		if(player.valid(client)) {
@@ -319,18 +332,18 @@ methodmap WorkingWithGameVoting
 				this.setVb(client, vid);
 				needed = ((player.num() * cVbPercent.IntValue) / 100);
 				votes = this.numOfVotes(victim, category);
+
 				if(votes < needed) {
 					PrintToChatAll("Player %N voted to ban %N (%d/%d)", client, victim, votes, needed );
 					
-					if(cProgress.BoolValue) 
-						if(cLogs.BoolValue)
+					if(cProgress.BoolValue) {
+						if(cLogs.BoolValue) {
 							LogToFile(LogFilePath, "Player %N(%s) voted for ban %N(%s) (%d/%d)",client, player.steam(client), victim, player.steam(victim), votes, needed);
+						}
+					}
 				}
 				else {
 					player.ban(victim, client); 
-					
-					if(cLogs.BoolValue) 
-						LogToFile(LogFilePath, "Player %N(%s) was banned by voting for %d minutes.",  client, player.steam(client), cVbDelay.IntValue);
 				}
 			}
 			case SQL_VOTEMUTE:
@@ -394,7 +407,7 @@ methodmap WorkingWithGameVoting
 		#endif
 		}
 	}
-	
+
 	public void FillPlayers(Menu handle, int client, int category) {
 		// detect exists vote
 		int existsvote = 0;

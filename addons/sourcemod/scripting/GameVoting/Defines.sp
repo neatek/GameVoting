@@ -12,6 +12,8 @@
 #define SQL_MUTESTAMP 3
 #define SQL_GAGSTAMP 4
 
+#define REASON_LEN 68
+
 #define SQL_PLAYERS "CREATE TABLE IF NOT EXISTS `gv_cache` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `steam` TEXT NOT NULL UNIQUE, `kicktime` INTEGER, `mutetime` INTEGER, `gagtime` INTEGER);"
 #define SQL_GETPLAYER "SELECT * FROM `gv_cache` WHERE `steam` = '%s' LIMIT 1"
 #define SQL_REGPLAYER "INSERT INTO `gv_cache` (`id`, `steam`) VALUES (NULL, '%s')"

@@ -5,6 +5,7 @@ Plugin_ConVars() {
 	cLogs  		= CreateConVar("gamevoting_logs",		"1",	"Enable or disable logs for plugin (def:1)", _, true, 0.0, true, 1.0);
 	cProgress  	= CreateConVar("gamevoting_progress",	"1",	"Do you want to log voting progress? (def:1)", _, true, 0.0, true, 1.0);
 	cImmunityf  = CreateConVar("gamevoting_admins_flag","a",	"What admins you want to hide from voting? Set \"0\" or \"\" for display ALL admins. (def:'a')", _, false);
+	cVoting  = CreateConVar("gamevoting_voting_flag","",		"Who can do vote? Set \"0\" or \"\" for ALL. (def:'')", _, false);
 	cAdmins  	= CreateConVar("gamevoting_autodisable","0",	"Disable plugin when admins on server? (def:0)", _, true, 0.0, true, 1.0);
 	cDelay		= CreateConVar("gamevoting_delay",		"10",	"Delay before vote again for other player (def:10)", _, true, 0.0, true, 120.0);
 	cMinimum 	= CreateConVar("gamevoting_players",	"4",	"Minimum players need to enable votes (def:4)", _, true, 0.0, true, 20.0);
@@ -37,6 +38,7 @@ Plugin_ConVars() {
 public OnConfigsExecuted()
 {
 	if(GetConVarBool(cEnable)) pEnabled = true;
+	LoadImmunityFlags();
 }
 
 public ConVarChanged(Handle:hCVar, const String:strOld[], const String:strNew[])

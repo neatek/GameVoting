@@ -49,6 +49,26 @@ public MenuHandler_Votegag(Handle:menu, MenuAction:action, client, param2)
 	}
 }
 
+public MenuHandler_Reason(Handle:menu, MenuAction:action, client, param2)
+{
+	if(action == MenuAction_End) CloseHandle(menu);
+	else if(action == MenuAction_Select) 
+	{
+		char item[11]; int reason;
+		GetMenuItem(menu, param2, item, sizeof(item));
+		reason = StringToInt(item); // reason from array
+		gv.setVbReason(client, reason); // set reason
+		
+		// launch ban menu
+		Menu GVMENU = CreateMenu(MenuHandler_Voteban, MenuAction:MENU_NO_PAGINATION);
+		SetMenuTitle(GVMENU, "GameVoting - Voteban");
+		AddMenuItem(GVMENU, "-1", "Reset vote", ITEMDRAW_DEFAULT);
+		gv.FillPlayers(GVMENU, client, SQL_VOTEBAN);
+		DisplayMenu(GVMENU, client, cMenuDelay.IntValue);
+		gv.setAs(client, GetTime()+ cDelay.IntValue); // antispam
+	}
+}
+
 /*
 	Database callbacks
 */
@@ -104,6 +124,6 @@ public LoadPlayer_Callback(Handle:owner, Handle:query, const String:error[], any
 	}
 	
 	// after load data
-	gv.displaydata(client);
+	//gv.displaydata(client);
 	gv.checkother(client);
 }

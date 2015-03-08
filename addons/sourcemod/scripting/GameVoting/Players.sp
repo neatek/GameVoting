@@ -15,16 +15,7 @@ methodmap WorkingWithPlayers
 		return false;
 	}
 	
-	public void ban(int client, int attacker)
-	{
-		if(attacker > 0) {
-			ServerCommand("sm_ban #%d %d \"Player %N banned by Gamevoting (votecaller: %N)\"", GetClientUserId(client), cVbDelay.IntValue, client, attacker);
-		} else {
-			ServerCommand("sm_ban #%d %d \"Player %N banned by Gamevoting (votecaller: CONSOLE)\"", GetClientUserId(client), cVbDelay.IntValue, client);
-		}
-		
-		PrintToChatAll("Player %N was banned by GameVoting. (Reason: Justice of players)", client);
-	}
+
 
 	public char steam(int client) {
 		char auth[STEAM_SIZE];
@@ -49,6 +40,27 @@ methodmap WorkingWithPlayers
 		#endif
 
 		return false; 
+	}
+	
+	public void ban(int client, int attacker)
+	{
+		char rSon[REASON_LEN];
+		int mReason = mostReason(client);
+		gReasons.GetString(mReason, rSon, sizeof(rSon));
+		#if defined PLUGIN_DEBUG
+		LogMessage("MOST REASON: %i", mReason);
+		#endif
+		if(attacker > 0) {
+			ServerCommand("sm_ban #%d %d \"Gamevoting (Reason: %s, votecaller: %N)\"", GetClientUserId(client), cVbDelay.IntValue, rSon, attacker);
+		} else {
+			ServerCommand("sm_ban #%d %d \"Gamevoting (Reason: %s, votecaller: CONSOLE)\"", GetClientUserId(client), cVbDelay.IntValue, rSon);
+		}
+		
+		PrintToChatAll("Player %N was banned by %N. (Reason: %s)", client, attacker, rSon);
+		
+		if(cLogs.BoolValue) {
+			LogToFile(LogFilePath, "Player %N(%s) was banned by %N for %d minutes (Reason: %s).",  client, this.steam(client), attacker, cVbDelay.IntValue, rSon);
+		}
 	}
 	
 	public bool vsteam(char steam[STEAM_SIZE]) {
