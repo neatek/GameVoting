@@ -1,0 +1,128 @@
+﻿"Phrases"
+{
+	"GameVoting_reset_vote"
+	{
+		"en" "Reset vote"
+	}
+	"GameVoting_menu_title_ban"
+	{
+		"#format" "{1:s}"
+		"en" "{1} Voteban."
+	}
+	"GameVoting_menu_title_kick"
+	{
+		"#format" "{1:s}"
+		"en" "{1} Votekick."
+	}
+	"GameVoting_menu_title_mute"
+	{
+		"#format" "{1:s}"
+		"en" "{1} Votemute."
+	}
+	"GameVoting_menu_title_silence"
+	{
+		"#format" "{1:s}"
+		"en" "{1} Votesilence."
+	}
+	"GameVoting_reseted"
+	{
+		"#format" "{1:s}"
+		"en" "{1} Your vote has been reset."
+	}
+	"GameVoting_needplayers"
+	{
+		"#format" "{1:s},{2:d}"
+		"en" "{1} Need more than {2} players on the server."
+	}
+	"GameVoting_admin_on_server"
+	{
+		"#format" "{1:s}"
+		"en" "{1} Votes are disabled, because admin on server."
+	}
+	"GameVoting_voted_for_kick"
+	{
+		"#format" "{1:s},{2:s},{3:s},{4:d},{5:d}"
+		"en" "{1} Player {2} voted for kick {3} ({4}/{5})"
+	}
+	"GameVoting_voted_for_ban"
+	{
+		"#format" "{1:s},{2:s},{3:s},{4:d},{5:d}"
+		"en" "{1} Player {2} voted for ban {3} ({4}/{5})"
+	}
+	"GameVoting_voted_for_mute"
+	{
+		"#format" "{1:s},{2:s},{3:s},{4:d},{5:d}"
+		"en" "{1} Player {2} voted for mute {3} ({4}/{5})"
+	}
+	"GameVoting_voted_for_silence"
+	{
+		"#format" "{1:s},{2:s},{3:s},{4:d},{5:d}"
+		"en" "{1} Player {2} voted for silence {3} ({4}/{5})"
+	}
+	"GameVoting_was_banned"
+	{
+		"#format" "{1:s},{2:s}"	
+		"en" "{1} Player {2} was banned by vote."
+	}	
+	"GameVoting_was_kicked"
+	{
+		"#format" "{1:s},{2:s}"	
+		"en" "{1} Player {2} was kicked by vote."
+	}	
+	"GameVoting_was_muted"
+	{
+		"#format" "{1:s},{2:s}"	
+		"en" "{1} Player {2} was muted by vote."
+	}	
+	"GameVoting_was_silenced"
+	{
+		"#format" "{1:s},{2:s}"	
+		"en" "{1} Player {2} was silenced by vote."
+	}	
+	"GameVoting_kick_wait_time"
+	{
+		"#format" "{1:s},{2:d}"
+		"en" "{1}, wait {2} sec"
+	}
+	"GameVoting_can_talk_chat"
+	{
+		"en" "You can talk and use chat NOW!"
+	}	
+	"GameVoting_cant_talk_chat"
+	{
+		"en" "You can't talk and use chat NOW!"
+	}	
+	"GameVoting_can_voice_chat"
+	{
+		"en" "You can use voice chat!"
+	}	
+	"GameVoting_cant_voice_chat"
+	{
+		"en" "You can't use voice chat!"
+	}	
+	"GameVoting_kick_disabled"
+	{
+		"#format" "{1:s}"
+		"en" "{1} Votekick function was disabled."
+	}
+	"GameVoting_ban_disabled"
+	{
+		"#format" "{1:s}"
+		"en" "{1} Voteban function was disabled."
+	}
+	"GameVoting_mute_disabled"
+	{
+		"#format" "{1:s}"
+		"en" "{1} Votemute function was disabled."
+	}
+	"GameVoting_silence_disabled"
+	{
+		"#format" "{1:s}"
+		"en" "{1} Votesilence function was disabled."
+	}
+	"GameVoting_antiflood"
+	{
+		"#format" "{1:s},{2:d}"
+		"en" "{1} Do not flood please, wait {2} sec."
+	}
+}

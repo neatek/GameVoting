@@ -1,0 +1,128 @@
+﻿"Phrases"
+{
+	"GameVoting_reset_vote"
+	{
+		"ru" "Сбросить голос"
+	}
+	"GameVoting_menu_title_ban"
+	{
+		"#format" "{1:s}"
+		"ru" "{1} Голосование за бан."
+	}
+	"GameVoting_menu_title_kick"
+	{
+		"#format" "{1:s}"
+		"ru" "{1} Голосование за кик."
+	}
+	"GameVoting_menu_title_mute"
+	{
+		"#format" "{1:s}"
+		"ru" "{1} Заглушить игрока."
+	}
+	"GameVoting_menu_title_silence"
+	{
+		"#format" "{1:s}"
+		"ru" "{1} Отключить чат и микрофон."
+	}
+	"GameVoting_reseted"
+	{
+		"#format" "{1:s}"
+		"ru" "{1} Ваш голос был сброшен."
+	}
+	"GameVoting_needplayers"
+	{
+		"#format" "{1:s},{2:d}"
+		"ru" "{1} Нужно более {2} игроков на сервере."
+	}
+	"GameVoting_admin_on_server"
+	{
+		"#format" "{1:s}"
+		"ru" "{1} Голосования отключены, так как админ на сервере."
+	}
+	"GameVoting_voted_for_kick"
+	{
+		"#format" "{1:s},{2:s},{3:s},{4:d},{5:d}"
+		"ru" "{1} Игрок {2} проголосовал за кик {3} ({4}/{5})"
+	}
+	"GameVoting_voted_for_ban"
+	{
+		"#format" "{1:s},{2:s},{3:s},{4:d},{5:d}"
+		"ru" "{1} Игрок {2} проголосовал за бан {3} ({4}/{5})"
+	}
+	"GameVoting_voted_for_mute"
+	{
+		"#format" "{1:s},{2:s},{3:s},{4:d},{5:d}"
+		"ru" "{1} Игрок {2} проголосовал за мут {3} ({4}/{5})"
+	}
+	"GameVoting_voted_for_silence"
+	{
+		"#format" "{1:s},{2:s},{3:s},{4:d},{5:d}"
+		"ru" "{1} Игрок {2} проголосовал за безмолвие {3} ({4}/{5})"
+	}
+	"GameVoting_was_banned"
+	{
+		"#format" "{1:s},{2:s}"	
+		"ru" "{1} Игрок {2} был забанен голосованием."
+	}	
+	"GameVoting_was_kicked"
+	{
+		"#format" "{1:s},{2:s}"	
+		"ru" "{1} Игрок {2} был выброшен с сервера по голосованию."
+	}	
+	"GameVoting_was_muted"
+	{
+		"#format" "{1:s},{2:s}"	
+		"ru" "{1} Игрок {2} был заглушен по голосованию."
+	}	
+	"GameVoting_was_silenced"
+	{
+		"#format" "{1:s},{2:s}"	
+		"ru" "{1} Игроку {2} дали безмолвие, отключены микрофон и чат."
+	}	
+	"GameVoting_kick_wait_time"
+	{
+		"#format" "{1:s},{2:d}"
+		"ru" "{1}, подождите {2} сек"
+	}
+	"GameVoting_can_talk_chat"
+	{
+		"ru" "Вы можете разговаривать и использовать чат!"
+	}	
+	"GameVoting_cant_talk_chat"
+	{
+		"ru" "Вы НЕ можете разговаривать и использовать чат!"
+	}	
+	"GameVoting_can_voice_chat"
+	{
+		"ru" "Вам включен микрофон!"
+	}	
+	"GameVoting_cant_voice_chat"
+	{
+		"ru" "Ваш микрофон был отключен!"
+	}	
+	"GameVoting_kick_disabled"
+	{
+		"#format" "{1:s}"
+		"ru" "{1} Голосование за кик было отключено."
+	}
+	"GameVoting_ban_disabled"
+	{
+		"#format" "{1:s}"
+		"ru" "{1} Голосование за бан было отключено."
+	}
+	"GameVoting_mute_disabled"
+	{
+		"#format" "{1:s}"
+		"ru" "{1} Голосование за отключение микрофона было отключено."
+	}
+	"GameVoting_silence_disabled"
+	{
+		"#format" "{1:s}"
+		"ru" "{1} Голосование за безмолвие был отключено."
+	}
+	"GameVoting_antiflood"
+	{
+		"#format" "{1:s},{2:d}"
+		"en" "{1} Пожалуйста не флуди, подожди {2} сек."
+	}
+}
