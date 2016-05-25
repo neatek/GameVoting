@@ -1,0 +1,128 @@
+﻿"Phrases"
+{
+	"GameVoting_reset_vote"
+	{
+		"de" "Stimme zurücksetzen"
+	}
+	"GameVoting_menu_title_ban"
+	{
+		"#format" "{1:s}"
+		"de" "{1} Spieler bannen"
+	}
+	"GameVoting_menu_title_kick"
+	{
+		"#format" "{1:s}"
+		"de" "{1} Spieler kicken"
+	}
+	"GameVoting_menu_title_mute"
+	{
+		"#format" "{1:s}"
+		"de" "{1} Spieler stummschalten"
+	}
+	"GameVoting_menu_title_silence"
+	{
+		"#format" "{1:s}"
+		"de" "{1} Spieler zum Schweigen bringen"
+	}
+	"GameVoting_reseted"
+	{
+		"#format" "{1:s}"
+		"de" "{1} Deine Stimme wurde zurückgesetzt."
+	}
+	"GameVoting_needplayers"
+	{
+		"#format" "{1:s},{2:d}"
+		"de" "{1} Es werden mehr als {2} Spieler auf dem Server benötigt."
+	}
+	"GameVoting_admin_on_server"
+	{
+		"#format" "{1:s}"
+		"de" "{1} Abstimmungen sind deaktiviert, da Admin auf Server."
+	}
+	"GameVoting_voted_for_kick"
+	{
+		"#format" "{1:s},{2:s},{3:s},{4:d},{5:d}"
+		"de" "{1} Spieler {2} stimmte dafür, {3} zu kicken ({4}/{5})"
+	}
+	"GameVoting_voted_for_ban"
+	{
+		"#format" "{1:s},{2:s},{3:s},{4:d},{5:d}"
+		"de" "{1} Spieler {2} stimmte dafür, {3} zu bannen ({4}/{5})"
+	}
+	"GameVoting_voted_for_mute"
+	{
+		"#format" "{1:s},{2:s},{3:s},{4:d},{5:d}"
+		"de" "{1} Spieler {2} stimmte dafür, {3} stummzuschalten ({4}/{5})"
+	}
+	"GameVoting_voted_for_silence"
+	{
+		"#format" "{1:s},{2:s},{3:s},{4:d},{5:d}"
+		"de" "{1} Spieler {2} stimmte dafür, {3} zum Schweigen zu bringen ({4}/{5})"
+	}
+	"GameVoting_was_banned"
+	{
+		"#format" "{1:s},{2:s}"	
+		"de" "{1} Spieler {2} wurde durch Abstimmung gebannt."
+	}	
+	"GameVoting_was_kicked"
+	{
+		"#format" "{1:s},{2:s}"	
+		"de" "{1} Spieler {2} wurde durch Abstimmung gekickt."
+	}	
+	"GameVoting_was_muted"
+	{
+		"#format" "{1:s},{2:s}"	
+		"de" "{1} Spieler {2} wurde durch Abstimmung stummgeschaltet."
+	}	
+	"GameVoting_was_silenced"
+	{
+		"#format" "{1:s},{2:s}"	
+		"de" "{1} Spieler {2} wurde durch Abstimmung zum Schweigen gebracht."
+	}	
+	"GameVoting_kick_wait_time"
+	{
+		"#format" "{1:s},{2:d}"
+		"de" "{1}, {2} Sek. warten"
+	}
+	"GameVoting_can_talk_chat"
+	{
+		"de" "Du kannst JETZT wieder reden und den Chat verwenden!"
+	}	
+	"GameVoting_cant_talk_chat"
+	{
+		"de" "Du kannst nun nicht mehr reden oder den Chat verwenden!"
+	}	
+	"GameVoting_can_voice_chat"
+	{
+		"de" "Du kannst jetzt den Sprach-Chat wieder verwenden!"
+	}	
+	"GameVoting_cant_voice_chat"
+	{
+		"de" "Du kannst jetzt den Sprach-Chat nicht mehr verwenden!"
+	}	
+	"GameVoting_kick_disabled"
+	{
+		"#format" "{1:s}"
+		"de" "{1} Votekick-Funktion wurde deaktiviert."
+	}
+	"GameVoting_ban_disabled"
+	{
+		"#format" "{1:s}"
+		"de" "{1} Voteban-Funktion wurde deaktiviert."
+	}
+	"GameVoting_mute_disabled"
+	{
+		"#format" "{1:s}"
+		"de" "{1} Votemute-Funktion wurde deaktiviert."
+	}
+	"GameVoting_silence_disabled"
+	{
+		"#format" "{1:s}"
+		"de" "{1} Votesilence-Funktion wurde deaktiviert."
+	}
+	"GameVoting_antiflood"
+	{
+		"#format" "{1:s},{2:d}"
+		"de" "{1} Bitte nicht übertreiben mit den Abstimmungen. Warte {2} Sekunden."
+	}
+}

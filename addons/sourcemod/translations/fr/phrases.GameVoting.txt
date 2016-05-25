@@ -1,0 +1,128 @@
+"Phrases"
+{	
+	"GameVoting_reset_vote"
+	{
+		"fr" "Réinitialiser vote"
+	}
+	"GameVoting_menu_title_ban"
+	{
+		"#format" "{1:s}"
+		"fr" "{1} Menu VoteBan."
+	}
+	"GameVoting_menu_title_kick"
+	{
+		"#format" "{1:s}"
+		"fr" "{1} Menu VoteKick."
+	}
+	"GameVoting_menu_title_mute"
+	{
+		"#format" "{1:s}"
+		"fr" "{1} Menu VoteMute."
+	}
+	"GameVoting_menu_title_silence"
+	{
+		"#format" "{1:s}"
+		"fr" "{1} Menu VoteSilence."
+	}
+	"GameVoting_reseted"
+	{
+		"#format" "{1:s}"
+		"fr" "{1} Votre vote a été remis à zéro."
+	}
+	"GameVoting_needplayers"
+	{
+		"#format" "{1:s},{2:d}"
+		"fr" "{1} Besoin de plus de {2} joueurs sur le serveur."
+	}
+	"GameVoting_admin_on_server"
+	{
+		"#format" "{1:s}"
+		"fr" "{1} Les votes sont désactivés, car il y a un admin le serveur."
+	}
+	"GameVoting_voted_for_kick"
+	{
+		"#format" "{1:s},{2:s},{3:s},{4:d},{5:d}"
+		"fr" "{1} Le joueur {2} a voté pour kicker {3} ({4}/{5}), votes requis."
+	}
+	"GameVoting_voted_for_ban"
+	{
+		"#format" "{1:s},{2:s},{3:s},{4:d},{5:d}"
+		"fr" "{1} Le joueur {2} a voté pour bannir {3} ({4}/{5}), votes requis."
+	}
+	"GameVoting_voted_for_mute"
+	{
+		"#format" "{1:s},{2:s},{3:s},{4:d},{5:d}"
+		"fr" "{1} Le joueur {2} a voté pour muter {3} ({4}/{5}), votes requis."
+	}
+	"GameVoting_voted_for_silence"
+	{
+		"#format" "{1:s},{2:s},{3:s},{4:d},{5:d}"
+		"fr" "{1} Le joueur {2} a voté pour rendre silencieux {3} ({4}/{5}), votes requis."
+	}
+	"GameVoting_was_banned"
+	{
+		"#format" "{1:s},{2:s}"
+		"fr" "{1} Le joueur {2} a été banni par le vote des joueurs."
+	}      
+	"GameVoting_was_kicked"
+	{
+		"#format" "{1:s},{2:s}"
+		"fr" "{1} Le joueur {2} a été kicker par le vote des joueurs."
+	}      
+	"GameVoting_was_muted"
+	{
+		"#format" "{1:s},{2:s}"
+		"fr" "{1} Le joueur {2} a été muter par le vote des joueurs."
+	}      
+	"GameVoting_was_silenced"
+	{
+		"#format" "{1:s},{2:s}"
+		"fr" "{1} Le joueur {2} a été réduit au silence par le vote des joueurs."
+	}      
+	"GameVoting_kick_wait_time"
+	{
+		"#format" "{1:s},{2:d}"
+		"fr" "{1}. S'il vous plaît attendez {2} secondes avant de rejoindre le serveur."
+	}
+	"GameVoting_can_talk_chat"
+	{
+		"fr" "Vous pouvez parler et utiliser le chat!"
+	}      
+	"GameVoting_cant_talk_chat"
+	{
+		"fr" "Vous ne pouvez pas parler ni utiliser le chat!"
+	}      
+	"GameVoting_can_voice_chat"
+	{
+		"fr" "Vous pouvez utiliser le chat vocal!"
+	}      
+	"GameVoting_cant_voice_chat"
+	{
+		"fr" "Vous ne pouvez pas utiliser le chat vocal!"
+	}      
+	"GameVoting_kick_disabled"
+	{
+		"#format" "{1:s}"
+		"fr" "{1} La fonction VoteKick a été désactivée."
+	}
+	"GameVoting_ban_disabled"
+	{
+		"#format" "{1:s}"
+		"fr" "{1} La fonction VoteBan a été désactivée."
+	}
+	"GameVoting_mute_disabled"
+	{
+		"#format" "{1:s}"
+		"fr" "{1} La fonction VoteMute a été désactivée."
+	}
+	"GameVoting_silence_disabled"
+	{
+		"#format" "{1:s}"
+		"fr" "{1} La fonction VoteSilence a été désactivée."
+	}
+	"GameVoting_antiflood"
+	{
+		"#format" "{1:s},{2:d}"
+		"fr" "{1} Ne flooder pas s'il vous plaît, attendez {2} sec."
+	}
+}

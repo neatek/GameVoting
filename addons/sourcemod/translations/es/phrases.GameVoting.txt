@@ -1,0 +1,128 @@
+﻿"Phrases"
+{
+	"GameVoting_reset_vote"
+	{
+		"es" "Resetear mi voto"
+	}
+	"GameVoting_menu_title_ban"
+	{
+		"#format" "{1:s}"
+		"es" "{1} Menú de VoteBan."
+	}
+	"GameVoting_menu_title_kick"
+	{
+		"#format" "{1:s}"
+		"es" "{1} Menú de VoteKick."
+	}
+	"GameVoting_menu_title_mute"
+	{
+		"#format" "{1:s}"
+		"es" "{1} Menú de VoteMute."
+	}
+	"GameVoting_menu_title_silence"
+	{
+		"#format" "{1:s}"
+		"es" "{1} Menú de VoteSilence."
+	}
+	"GameVoting_reseted"
+	{
+		"#format" "{1:s}"
+		"es" "{1} Tu voto ha sido reseteado."
+	}
+	"GameVoting_needplayers"
+	{
+		"#format" "{1:s},{2:d}"
+		"es" "{1} Se necesitan {2} jugadores para empezar esta votación."
+	}
+	"GameVoting_admin_on_server"
+	{
+		"#format" "{1:s}"
+		"es" "{1} Los votos están desactivados, debido a que hay admins en el servidor."
+	}
+	"GameVoting_voted_for_kick"
+	{
+		"#format" "{1:s},{2:s},{3:s},{4:d},{5:d}"
+		"es" "{1} El jugador {2} vota para kickear a {3} ({4}/{5}), votos requeridos."
+	}
+	"GameVoting_voted_for_ban"
+	{
+		"#format" "{1:s},{2:s},{3:s},{4:d},{5:d}"
+		"es" "{1} El jugador {2} vota para banear a {3} ({4}/{5}), votos requeridos."
+	}
+	"GameVoting_voted_for_mute"
+	{
+		"#format" "{1:s},{2:s},{3:s},{4:d},{5:d}"
+		"es" "{1} El jugador {2} vota para mutear a {3} ({4}/{5}), votos requeridos."
+	}
+	"GameVoting_voted_for_silence"
+	{
+		"#format" "{1:s},{2:s},{3:s},{4:d},{5:d}"
+		"es" "{1} El jugador {2} vota para silenciar a {3} ({4}/{5}), votos requeridos."
+	}
+	"GameVoting_was_banned"
+	{
+		"#format" "{1:s},{2:s}"	
+		"es" "{1} El jugador {2} ha sido baneado por votación de jugadores."
+	}	
+	"GameVoting_was_kicked"
+	{
+		"#format" "{1:s},{2:s}"	
+		"es" "{1} El jugador {2} ha kickeado por votación de jugadores."
+	}	
+	"GameVoting_was_muted"
+	{
+		"#format" "{1:s},{2:s}"	
+		"es" "{1} El jugador {2} ha sido muteado por votación de jugadores."
+	}	
+	"GameVoting_was_silenced"
+	{
+		"#format" "{1:s},{2:s}"	
+		"es" "{1} El jugador {2} ha sido silenciado por votación de jugadores."
+	}	
+	"GameVoting_kick_wait_time"
+	{
+		"#format" "{1:s},{2:d}"
+		"es" "{1}. Porfavor espera {2} segundos antes de volver a entrar al servidor."
+	}
+	"GameVoting_can_talk_chat"
+	{
+		"es" "Ya puedes hablar y usar el chat AHORA! (Des-silenciado)."
+	}	
+	"GameVoting_cant_talk_chat"
+	{
+		"es" "Tu no puedes hablar ni usar el chat actualmente! (Silenciado)."
+	}	
+	"GameVoting_can_voice_chat"
+	{
+		"es" "Ya puedes usar el chat de voz! (Des-Muteado)."
+	}	
+	"GameVoting_cant_voice_chat"
+	{
+		"es" "No puedes usar el chat de voz ahora! (Muteado)."
+	}	
+	"GameVoting_kick_disabled"
+	{
+		"#format" "{1:s}"
+		"es" "{1} La función de VoteKick está desactivada."
+	}
+	"GameVoting_ban_disabled"
+	{
+		"#format" "{1:s}"
+		"es" "{1} La función de VoteBan está desactivada."
+	}
+	"GameVoting_mute_disabled"
+	{
+		"#format" "{1:s}"
+		"es" "{1} La función de VoteMute está desactivada."
+	}
+	"GameVoting_silence_disabled"
+	{
+		"#format" "{1:s}"
+		"es" "{1} La función de VoteSilence está desactivada."
+	}
+	"GameVoting_antiflood"
+	{
+		"#format" "{1:s},{2:d}"
+		"es" "{1} No hagas flood porfavor, espera {2} segundos."
+	}
+}
