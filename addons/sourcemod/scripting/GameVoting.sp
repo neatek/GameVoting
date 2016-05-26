@@ -9,3 +9,12 @@
 #include "GameVoting/Listener.sp"
 #include "GameVoting/Functions.sp"
 #include "GameVoting/Other.sp"
+
+public Plugin myinfo =
+{
+	name = "GameVoting",
+	author = "Neatek",
+	description = "Simple sourcemod plugin for voting",
+	version = "1.7.7",
+	url = "https://github.com/neatek/GameVoting"
+};
