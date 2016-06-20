@@ -1,4 +1,5 @@
 #include <sdktools>
+#include <sourcemod>
 #include "GameVoting/Defines.sp"
 #include "GameVoting/Variables.sp"
 #include "GameVoting/Players.sp"
@@ -15,6 +16,6 @@ public Plugin myinfo =
 	name = "GameVoting",
 	author = "Neatek",
 	description = "Simple sourcemod plugin for voting",
-	version = "1.7.7",
+	version = "1.7.9",
 	url = "https://github.com/neatek/GameVoting"
 };
