@@ -377,7 +377,7 @@ methodmap WorkingWithGameVoting
 					//if(cLogs.BoolValue) LogToFile(LogFilePath, "[%s] Player %N(%s) voted for kick %N(%s) (%d/%d)", this.getDate(), client, player.steam(client), victim, player.steam(victim), votes, needed);
 				}
 				else {
-					this.setkick(client, cVkDelay.IntValue);
+					this.setkick(victim, cVkDelay.IntValue);
 					
 				}
 			}
@@ -396,7 +396,7 @@ methodmap WorkingWithGameVoting
 					//if(cLogs.BoolValue) LogToFile(LogFilePath, "[%s] Player %N(%s) voted for kick %N(%s) (%d/%d)", this.getDate(), client, player.steam(client), victim, player.steam(victim), votes, needed);
 				}
 				else {
-					this.gagplayer(client, cVgDelay.IntValue);
+					this.gagplayer(victim, cVgDelay.IntValue);
 				}
 			}
 		}
