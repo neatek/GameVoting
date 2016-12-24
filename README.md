@@ -10,3 +10,6 @@ Add into addons\sourcemod\configs\databases.cfg
 		"database"  "gamevoting-local"
 }
 ```
+# GameVoting 1.8.0dev
+https://github.com/neatek/GameVoting/tree/dev (not stable)
+just copy&paste folders on your server
