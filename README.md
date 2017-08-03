@@ -1,5 +1,12 @@
 # GameVoting 1.8.3dev
-Simple voting plugin Sourcemod.net for TF2, CSS, CSGO etc
+Very simple (light) voting plugin Sourcemod.net for TF2, CSS, CSGO etc
 
 # How to Install
 just replace addons folder!
+
+# Support GameVoting 
+If you like my job (plugin) you can send me some $$$ on beer.
+
+https://www.paypal.me/neatek
+
+[![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.me/neatek)
