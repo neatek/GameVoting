@@ -7,7 +7,9 @@ just replace addons folder!
 # Support GameVoting 
 If you like my job (plugin) you can send me some $$$ on beer.
 https://www.paypal.me/neatek
+
 [![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.me/neatek/3)
+
 * Для русских пользователей вы можете использовать ссылку https://neatek.ru/gvsupport/
 
 # Will be released:
