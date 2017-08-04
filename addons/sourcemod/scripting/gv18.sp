@@ -92,7 +92,7 @@ public void register_ConVars() {
 	CONVAR_ENABLED = CreateConVar("gamevoting_enable",	"1", "Enable or disable plugin (def:1)", _, true, 0.0, true, 1.0);	
 
 	// min players
-	CONVAR_MIN_PLAYERS = CreateConVar("gamevoting_players",	"1",	"Minimum players need to enable votes (def:8)", _, true, 0.0, true, 20.0);
+	CONVAR_MIN_PLAYERS = CreateConVar("gamevoting_players",	"8",	"Minimum players need to enable votes (def:8)", _, true, 0.0, true, 20.0);
 	CONVAR_AUTODISABLE = CreateConVar("gamevoting_autodisable","0",	"Disable plugin when admins on server? (def:0)", _, true, 0.0, true, 1.0);
 
 	// disables
