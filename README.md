@@ -16,7 +16,7 @@ https://www.paypal.me/neatek
 * Для русских пользователей вы можете использовать ссылку https://neatek.ru/gvsupport/
 
 # Will be released:
-- start voting by command for all users using menus. (voteban - yes/no)
+- RELEASED 04.08.2017 - start voting by command for all users using menus. (voteban - yes/no)
 - translations.
 - improvements.
 - chat colors.
