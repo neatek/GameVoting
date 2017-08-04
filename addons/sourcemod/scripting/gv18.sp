@@ -103,9 +103,9 @@ public void register_ConVars() {
 	//CONVAR_SILENCE_ENABLE = CreateConVar("gamevoting_votesilence",	"1",	"Enable or disable silence (def:1)", _, true, 0.0, true, 1.0);
 
 	// durations
-	CONVAR_BAN_DURATION = CreateConVar("gamevoting_voteban_delay", "1", "Ban duration in minutes (def:120)", _, true, 0.0, false);
+	CONVAR_BAN_DURATION = CreateConVar("gamevoting_voteban_delay", "20", "Ban duration in minutes (def:120)", _, true, 0.0, false);
 	CONVAR_KICK_DURATION = CreateConVar("gamevoting_votekick_delay", "20", "Kick duration in seconds (def:20)", _, true, 0.0, false);
-	CONVAR_MUTE_DURATION = CreateConVar("gamevoting_votemute_delay", "1", "Mute duration in minutes (def:120)", _, true, 0.0, false);
+	CONVAR_MUTE_DURATION = CreateConVar("gamevoting_votemute_delay", "20", "Mute duration in minutes (def:120)", _, true, 0.0, false);
 	//CONVAR_SILENCE_DURATION = CreateConVar("gamevoting_votesilence_delay", "1", "Mute duration in minutes (def:120)", _, true, 0.0, false);
 
 	// percent
@@ -432,7 +432,7 @@ public void SetChoise(int type, int client, int target) {
 			}
 			
 			if(current >= needed) {
-				DoAction(target, type);
+				DoAction(target, type, client);
 			}
 
 		}
@@ -789,13 +789,13 @@ public int menu_handler(Menu menu, MenuAction action, int client, int item) {
 }
 
 // do action 
-public void DoAction(int client, int type) {
+public void DoAction(int client, int type, int last) {
 	
 	switch(type) {
 		case VOTE_BAN: {
 			ClearChoise(client);  // clear votes of players if kick or ban
 			ClearVotesForClient(client, VOTE_BAN);
-			ServerCommand("sm_ban #%d %d \"Banned by Gamevoting (%N)\"", GetClientUserId(client), CONVAR_BAN_DURATION.IntValue, client);
+			ServerCommand("sm_ban #%d %d \"Banned by Gamevoting (%N)\"", GetClientUserId(client), CONVAR_BAN_DURATION.IntValue, last);
 		}
 		case VOTE_KICK: {
 			ClearChoise(client); // clear votes of players if kick or ban
@@ -808,7 +808,7 @@ public void DoAction(int client, int type) {
 			[SourceComms++] Usage: sm_mute <#userid|name> [reason]
 			*/
 			ClearVotesForClient(client, VOTE_MUTE);
-			ServerCommand("sm_silence #%d %d \"Muted by Gamevoting (%N)\"", GetClientUserId(client), CONVAR_MUTE_DURATION.IntValue, client);
+			ServerCommand("sm_silence #%d %d \"Muted by Gamevoting (%N)\"", GetClientUserId(client), CONVAR_MUTE_DURATION.IntValue, last);
 		}
 		/*case VOTE_SILENCE: {
 			ServerCommand("sm_silence #%d %d \"Silenced by Gamevoting (%N)\"", GetClientUserId(client), CONVAR_SILENCE_DURATION.IntValue, client);
