@@ -7,9 +7,8 @@
 
 	# GAMEVOTING #
 		Vladimir Zhelnov @neatek
-		web & ios &system developer
 		Sourcemod 1.8 // 2017
-	
+
 	Contact me:
 	https://discord.gg/J7eSXuU
 	
