@@ -14,6 +14,7 @@
 	
 ***/
 
+#define VERSION "1.8.4"
 // Boring to type it again and again
 #define EVENT_PARAMS Handle event, const char[] name, bool dontBroadcast
 //#define PLUGIN_DEBUG_MODE 1
@@ -88,7 +89,7 @@ int g_KickedPlayers[MAXPLAYERS+1][ENUM_KICKED_PLAYERS];
 
 public void register_ConVars() {
 	
-	CONVAR_VERSION = CreateConVar("sm_gamevoting_version", "1.8.3dev", "Version of gamevoting plugin. DISCORD - https://discord.gg/J7eSXuU , Author: Neatek, www.neatek.ru", FCVAR_SPONLY|FCVAR_REPLICATED|FCVAR_NOTIFY);
+	CONVAR_VERSION = CreateConVar("sm_gamevoting_version", VERSION, "Version of gamevoting plugin. DISCORD - https://discord.gg/J7eSXuU , Author: Neatek, www.neatek.ru", FCVAR_SPONLY|FCVAR_REPLICATED|FCVAR_NOTIFY);
 	CONVAR_ENABLED = CreateConVar("gamevoting_enable",	"1", "Enable or disable plugin (def:1)", _, true, 0.0, true, 1.0);	
 
 	// min players
