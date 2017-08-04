@@ -63,8 +63,10 @@
 //#define CONVAR_SILENCE_PERCENT ConVars[15]
 #define CONVAR_IMMUNITY_FLAG ConVars[16]
 #define CONVAR_IMMUNITY_zFLAG ConVars[17]
+
 #define CONVAR_FLAG_START_VOTE ConVars[4]
 #define CONVAR_START_VOTE_DELAY ConVars[9]
+#define CONVAR_START_VOTE_ENABLE ConVars[15]
 
 int g_startvote_delay = 0;
 ConVar ConVars[20];
@@ -90,7 +92,7 @@ public void register_ConVars() {
 	CONVAR_ENABLED = CreateConVar("gamevoting_enable",	"1", "Enable or disable plugin (def:1)", _, true, 0.0, true, 1.0);	
 
 	// min players
-	CONVAR_MIN_PLAYERS = CreateConVar("gamevoting_players",	"8",	"Minimum players need to enable votes (def:8)", _, true, 0.0, true, 20.0);
+	CONVAR_MIN_PLAYERS = CreateConVar("gamevoting_players",	"1",	"Minimum players need to enable votes (def:8)", _, true, 0.0, true, 20.0);
 	CONVAR_AUTODISABLE = CreateConVar("gamevoting_autodisable","0",	"Disable plugin when admins on server? (def:0)", _, true, 0.0, true, 1.0);
 
 	// disables
@@ -115,6 +117,7 @@ public void register_ConVars() {
 	CONVAR_IMMUNITY_FLAG = CreateConVar("gamevoting_immunity_flag",	"a",	"Immunity flag from all votes (def:a)");
 	CONVAR_IMMUNITY_zFLAG = CreateConVar("gamevoting_immunity_zflag",	"1",	"Immunity for admin flag \"z\"");
 
+	CONVAR_START_VOTE_ENABLE = CreateConVar("gamevoting_startvote_enable", "1", "Disable of enable public votes (def:1)", _, true, 0.0, true, 1.0);
 	CONVAR_FLAG_START_VOTE = CreateConVar("gamevoting_startvote_flag",	"",	"Who can start voting for ban or something, set empty for all players (def:a)");
 	CONVAR_START_VOTE_DELAY = CreateConVar("gamevoting_startvote_delay", "20", "Delay between public votes in seconds (def:20)", _, true, 0.0, false);
 	
@@ -522,6 +525,7 @@ public void CheckCommand(int client, const char[] args, const char[] pref) {
 	}
 
 	if(CountPlayers() < CONVAR_MIN_PLAYERS.IntValue) {
+		PrintToChat(client, "[GameVoting] Minimum players for voting - %d.", CONVAR_MIN_PLAYERS.IntValue);
 		return;
 	}
 	
@@ -581,7 +585,7 @@ public bool StartVoteFlag(int client) {
 		PrintToChatAll("%d > %d [%d]", (g_startvote_delay), GetTime(), ( (g_startvote_delay) - GetTime()  )  );
 	#endif
 
-	if(g_startvote_delay > GetTime() ) {
+	if(g_startvote_delay > GetTime() && CONVAR_START_VOTE_ENABLE.IntValue > 0 ) {
 		PrintToChat(client, "[GameVoting] Please wait %dsec before start public vote.", ((g_startvote_delay)-GetTime()) );
 		return false;
 	}
@@ -592,9 +596,6 @@ public bool StartVoteFlag(int client) {
 	
 	new b_flags = ReadFlagString(s_flag);
 	if ((GetUserFlagBits(client) & b_flags) == b_flags) {
-		
-
-		
 		return true;
 	}
 	
@@ -642,8 +643,11 @@ public ShowMenu(int client, int type) {
 			#if defined PLUGIN_DEBUG_MODE
 				PrintToChatAll("StartVoteFlag() == true");
 			#endif
-		
-			mymenu = new Menu(startvote_menu_player_handler);
+			
+			if(CONVAR_START_VOTE_ENABLE.IntValue > 0)
+				mymenu = new Menu(startvote_menu_player_handler);
+			else
+				mymenu = new Menu(menu_handler);
 		}
 		
 		switch(type) {
@@ -812,4 +816,3 @@ public void DoAction(int client, int type) {
 	}
 	
 }
-
