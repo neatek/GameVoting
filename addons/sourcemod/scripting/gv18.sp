@@ -63,7 +63,10 @@
 //#define CONVAR_SILENCE_PERCENT ConVars[15]
 #define CONVAR_IMMUNITY_FLAG ConVars[16]
 #define CONVAR_IMMUNITY_zFLAG ConVars[17]
+#define CONVAR_FLAG_START_VOTE ConVars[4]
+#define CONVAR_START_VOTE_DELAY ConVars[9]
 
+int g_startvote_delay = 0;
 ConVar ConVars[20];
 enum ENUM_VOTE_CHOISE
 {
@@ -112,6 +115,9 @@ public void register_ConVars() {
 	CONVAR_IMMUNITY_FLAG = CreateConVar("gamevoting_immunity_flag",	"a",	"Immunity flag from all votes (def:a)");
 	CONVAR_IMMUNITY_zFLAG = CreateConVar("gamevoting_immunity_zflag",	"1",	"Immunity for admin flag \"z\"");
 
+	CONVAR_FLAG_START_VOTE = CreateConVar("gamevoting_startvote_flag",	"",	"Who can start voting for ban or something, set empty for all players (def:a)");
+	CONVAR_START_VOTE_DELAY = CreateConVar("gamevoting_startvote_delay", "20", "Delay between public votes in seconds (def:20)", _, true, 0.0, false);
+	
 	AutoExecConfig(true, "Gamevoting");
 }
 
@@ -449,10 +455,12 @@ public bool IsCorrectPlayer(int client) {
 		return false;
 	}
 	
+	#if !defined PLUGIN_DEBUG_MODE
 	if(IsFakeClient(client) || IsClientSourceTV(client)) {
 		return false;
 	}
-
+	#endif
+	
 	return true;
 }
 
@@ -475,8 +483,8 @@ public Action OnClientSayCommand(int client, const char[] command, const char[] 
 	VALID_PLAYER {
 		
 		#if defined PLUGIN_DEBUG_MODE
-			LogMessage("sArgs : %s", sArgs);
-			PrintToChatAll("sArgs : %s", sArgs);
+		//	LogMessage("sArgs : %s", sArgs);
+		//	PrintToChatAll("sArgs : %s", sArgs);
 		#endif
 		
 		if(sArgs[0] == '!' && sArgs[1] == 'v' && sArgs[2] == 'o' && sArgs[3] == 't' && sArgs[4] == 'e') 
@@ -500,9 +508,9 @@ public void CheckCommand(int client, const char[] args, const char[] pref) {
 	TrimString(command);
 	
 	#if defined PLUGIN_DEBUG_MODE
-		LogMessage("command : %s", command);
-		PrintToChatAll("command : %s", command);
-		HasImmunity(client);
+	//	LogMessage("command : %s", command);
+	//	PrintToChatAll("command : %s", command);
+	//	HasImmunity(client);
 	#endif
 	
 	if(strlen(pref) > 0) {
@@ -560,13 +568,45 @@ public void CheckCommand(int client, const char[] args, const char[] pref) {
 	}*/
 }
 
+public bool StartVoteFlag(int client) {
+
+	char s_flag[11];
+	GetConVarString(CONVAR_FLAG_START_VOTE, s_flag, sizeof(s_flag));
+	
+	#if defined PLUGIN_DEBUG_MODE
+		PrintToChatAll("flag - %s", s_flag);
+	#endif
+	
+	#if defined PLUGIN_DEBUG_MODE
+		PrintToChatAll("%d > %d [%d]", (g_startvote_delay), GetTime(), ( (g_startvote_delay) - GetTime()  )  );
+	#endif
+
+	if(g_startvote_delay > GetTime() ) {
+		PrintToChat(client, "[GameVoting] Please wait %dsec before start public vote.", ((g_startvote_delay)-GetTime()) );
+		return false;
+	}
+	
+	if(strlen(s_flag) < 1) {
+		return true;
+	}
+	
+	new b_flags = ReadFlagString(s_flag);
+	if ((GetUserFlagBits(client) & b_flags) == b_flags) {
+		
+
+		
+		return true;
+	}
+	
+	return false;
+}
 
 public bool HasImmunity(int client) {
 	char s_flag[11];
 	GetConVarString(CONVAR_IMMUNITY_FLAG, s_flag, sizeof(s_flag));
 	new b_flags = ReadFlagString(s_flag);
 	#if defined PLUGIN_DEBUG_MODE
-		PrintToChatAll("flag - %s", s_flag);
+	//	PrintToChatAll("flag - %s", s_flag);
 	#endif
 	if ((GetUserFlagBits(client) & b_flags) == b_flags) {
 		return true;
@@ -592,7 +632,20 @@ public ShowMenu(int client, int type) {
 			return;
 	
 		VAR_CTYPE = type;
-		Menu mymenu = new Menu(menu_handler);
+		
+		Menu mymenu;
+		
+		if(!StartVoteFlag(client)) {
+			mymenu = new Menu(menu_handler);
+		}
+		else {
+			#if defined PLUGIN_DEBUG_MODE
+				PrintToChatAll("StartVoteFlag() == true");
+			#endif
+		
+			mymenu = new Menu(startvote_menu_player_handler);
+		}
+		
 		switch(type) {
 			case VOTE_BAN: {
 				mymenu.SetTitle("GAMEVOTING - BAN");
@@ -626,6 +679,93 @@ public ShowMenu(int client, int type) {
 			}
 		}
 		mymenu.Display(client, MENU_TIME_FOREVER);
+	}
+}
+
+public void StartVote(int client, int target, int type) {
+
+	VALID_PLAYER { VALID_TARGET {
+		g_startvote_delay = GetTime() + CONVAR_START_VOTE_DELAY.IntValue;
+
+
+		for(int i = 1; i <= MaxClients; i++) {
+			if(IsCorrectPlayer(i)) {
+				// start vote menus
+				Menu mymenu = new Menu(menu_startvote_action_handler);
+				char s_typeInitiator[48];
+				// client, target, type / explode
+				FormatEx(s_typeInitiator,sizeof(s_typeInitiator),"%d|%d|%d",client,target,VAR_CTYPE);
+				
+				#if defined PLUGIN_DEBUG_MODE
+					PrintToChatAll("%s", s_typeInitiator);
+				#endif
+				
+				char s_Menu[86];
+				switch(VAR_CTYPE) {
+					case VOTE_BAN: {
+						FormatEx(s_Menu,sizeof(s_Menu),"GAMEVOTING - Ban %N?", target);
+					}
+					case VOTE_KICK: {
+						FormatEx(s_Menu,sizeof(s_Menu),"GAMEVOTING - Kick %N?", target);
+					}
+					case VOTE_MUTE: {
+						FormatEx(s_Menu,sizeof(s_Menu),"GAMEVOTING - Mute %N?", target);
+					}
+					default: {
+						FormatEx(s_Menu,sizeof(s_Menu),"GAMEVOTING?");
+						return;
+					}	
+				}
+				mymenu.SetTitle(s_Menu);
+				mymenu.AddItem(s_typeInitiator,"Yes");
+				mymenu.AddItem("","No");
+				mymenu.Display(client, MENU_TIME_FOREVER);
+			}
+		}
+
+	} }
+}
+
+// startvote_menu_handler
+public int startvote_menu_player_handler(Menu menu, MenuAction action, int client, int item) {
+
+	if (action == MenuAction_Select) {
+	
+		char info[11];
+		GetMenuItem(menu, item, info, sizeof(info));
+		StartVote(client, StringToInt(info), VAR_CTYPE);
+		
+	}
+	else if (action == MenuAction_End) {
+		CloseHandle(menu);
+	}
+}
+
+// action startvote
+public int menu_startvote_action_handler(Menu menu, MenuAction action, int client, int item) {
+	if (action == MenuAction_Select) {
+		#if defined PLUGIN_DEBUG_MODE
+			PrintToChatAll("menu_startvote_action_handler()");
+		#endif
+		char info[48];
+		GetMenuItem(menu, item, info, sizeof(info));
+		char ex[3][11];
+		ExplodeString(info, "|", ex, 3, 11);
+		
+		#if defined PLUGIN_DEBUG_MODE
+			PrintToChatAll("startvote_menu_handler / info %s", info);
+		#endif
+
+		//int initiator = StringToInt(ex[0]);
+		int target = StringToInt(ex[1]);
+		int type = StringToInt(ex[2]);
+
+		VALID_TARGET {
+			SetChoise(type, client, target);
+		}
+	}
+	else if (action == MenuAction_End) {
+		CloseHandle(menu);
 	}
 }
 
