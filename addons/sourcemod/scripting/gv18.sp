@@ -29,6 +29,12 @@
 #define VAR_VOTEKICK g_VoteChoise[client][vkSteam]
 #define VAR_VOTEMUTE g_VoteChoise[client][vmSteam]
 #define VAR_VOTESILENCE g_VoteChoise[client][vsSteam]
+
+#define VAR_IVOTEBAN g_VoteChoise[i][vbSteam]
+#define VAR_IVOTEKICK g_VoteChoise[i][vkSteam]
+#define VAR_IVOTEMUTE g_VoteChoise[i][vmSteam]
+#define VAR_IVOTESILENCE g_VoteChoise[i][vsSteam]
+
 #define VAR_TVOTEBAN g_VoteChoise[target][vbSteam]
 #define VAR_TVOTEKICK g_VoteChoise[target][vkSteam]
 #define VAR_TVOTEMUTE g_VoteChoise[target][vmSteam]
@@ -44,18 +50,18 @@
 #define CONVAR_ENABLED ConVars[1]
 #define CONVAR_BAN_DURATION ConVars[2]
 #define CONVAR_MUTE_DURATION ConVars[3]
-#define CONVAR_SILENCE_DURATION ConVars[4] 
+//#define CONVAR_SILENCE_DURATION ConVars[4] 
 #define CONVAR_KICK_DURATION ConVars[5]
 #define CONVAR_BAN_ENABLE ConVars[6]
 #define CONVAR_KICK_ENABLE ConVars[7]
 #define CONVAR_MUTE_ENABLE ConVars[8]
-#define CONVAR_SILENCE_ENABLE ConVars[9]
+//#define CONVAR_SILENCE_ENABLE ConVars[9]
 #define CONVAR_MIN_PLAYERS ConVars[10]
 #define CONVAR_AUTODISABLE ConVars[11]
 #define CONVAR_BAN_PERCENT ConVars[12]
 #define CONVAR_KICK_PERCENT ConVars[13]
 #define CONVAR_MUTE_PERCENT ConVars[14]
-#define CONVAR_SILENCE_PERCENT ConVars[15]
+//#define CONVAR_SILENCE_PERCENT ConVars[15]
 #define CONVAR_IMMUNITY_FLAG ConVars[16]
 #define CONVAR_IMMUNITY_zFLAG ConVars[17]
 
@@ -89,19 +95,19 @@ public void register_ConVars() {
 	CONVAR_BAN_ENABLE = CreateConVar("gamevoting_voteban",	"1",	"Enable or disable voteban functional (def:1)", _, true, 0.0, true, 1.0);
 	CONVAR_KICK_ENABLE = CreateConVar("gamevoting_votekick",	"1",	"Enable or disable votekick (def:1)", _, true, 0.0, true, 1.0);
 	CONVAR_MUTE_ENABLE = CreateConVar("gamevoting_votemute",	"1",	"Enable or disable votemute (def:1)", _, true, 0.0, true, 1.0);
-	CONVAR_SILENCE_ENABLE = CreateConVar("gamevoting_votesilence",	"1",	"Enable or disable silence (def:1)", _, true, 0.0, true, 1.0);
+	//CONVAR_SILENCE_ENABLE = CreateConVar("gamevoting_votesilence",	"1",	"Enable or disable silence (def:1)", _, true, 0.0, true, 1.0);
 
 	// durations
 	CONVAR_BAN_DURATION = CreateConVar("gamevoting_voteban_delay", "1", "Ban duration in minutes (def:120)", _, true, 0.0, false);
 	CONVAR_KICK_DURATION = CreateConVar("gamevoting_votekick_delay", "20", "Kick duration in seconds (def:20)", _, true, 0.0, false);
 	CONVAR_MUTE_DURATION = CreateConVar("gamevoting_votemute_delay", "1", "Mute duration in minutes (def:120)", _, true, 0.0, false);
-	CONVAR_SILENCE_DURATION = CreateConVar("gamevoting_votesilence_delay", "1", "Mute duration in minutes (def:120)", _, true, 0.0, false);
+	//CONVAR_SILENCE_DURATION = CreateConVar("gamevoting_votesilence_delay", "1", "Mute duration in minutes (def:120)", _, true, 0.0, false);
 
 	// percent
 	CONVAR_BAN_PERCENT = CreateConVar("gamevoting_voteban_percent",	"80",	"Needed percent of players for ban someone (def:80)", _, true, 0.0, true, 100.0);
 	CONVAR_KICK_PERCENT = CreateConVar("gamevoting_votekick_percent", "80",	"Needed percent of players for kick someone (def:80)", _, true, 0.0, true, 100.0);
 	CONVAR_MUTE_PERCENT = CreateConVar("gamevoting_votemute_percent", "75",	"Needed percent of players for mute someone (def:75)", _, true, 0.0, true, 100.0);
-	CONVAR_SILENCE_PERCENT = CreateConVar("gamevoting_votesilence_percent",	 "75",	"Needed percent of players for silence someone (def:75)", _, true, 0.0, true, 100.0);
+	//CONVAR_SILENCE_PERCENT = CreateConVar("gamevoting_votesilence_percent",	 "75",	"Needed percent of players for silence someone (def:75)", _, true, 0.0, true, 100.0);
 	
 	// Immunity flags
 	CONVAR_IMMUNITY_FLAG = CreateConVar("gamevoting_immunity_flag",	"a",	"Immunity flag from all votes (def:a)");
@@ -141,7 +147,9 @@ public int FindFreeSlot() {
 
 public bool isadmin(int client)
 {
-	if(GetUserAdmin(client) != INVALID_ADMIN_ID) return true;
+	if(GetUserAdmin(client) != INVALID_ADMIN_ID) 
+		return true;
+	
 	return false;
 }
 
@@ -160,7 +168,48 @@ public bool adminsonserver()
 	return result;
 }
 
-public PushKickedPlayer(int client) {
+
+public void ClearVotesForClient(int client, int type) {
+	VALID_PLAYER {
+		
+		char auth[32];
+		GetClientAuthId(client, AuthId_Engine, auth, sizeof(auth));
+		
+		for(int i =0 ; i <= MAXPLAYERS; i ++) {
+			
+			switch(type) {
+				case VOTE_BAN: {
+					if(StrEqual(VAR_IVOTEBAN,auth,true)) {
+						strcopy(VAR_IVOTEBAN, 32, "");
+					}
+				}
+				
+				case VOTE_KICK: {
+					if(StrEqual(VAR_IVOTEKICK,auth,true)) {
+						strcopy(VAR_IVOTEKICK, 32, "");
+					}
+				}
+				
+				case VOTE_MUTE: {
+					if(StrEqual(VAR_IVOTEMUTE,auth,true)) {
+						strcopy(VAR_IVOTEMUTE, 32, "");
+					}
+				}
+
+				default: {
+					break;
+				}
+				
+			}
+
+			/*if(StrEqual(VAR_IVOTESILENCE,auth,true)) {
+				strcopy(VAR_IVOTESILENCE, 32, "");
+			}*/
+		}
+	}
+}
+
+public void PushKickedPlayer(int client) {
 	VALID_PLAYER {
 		int slot = FindFreeSlot();
 		#if defined PLUGIN_DEBUG_MODE
@@ -284,7 +333,7 @@ public void ClearChoise(int client) {
 	strcopy(VAR_VOTEBAN, 32, "");
 	strcopy(VAR_VOTEKICK, 32, "");
 	strcopy(VAR_VOTEMUTE, 32, "");
-	strcopy(VAR_VOTESILENCE, 32, "");
+	//strcopy(VAR_VOTESILENCE, 32, "");
 }
 
 public int GetCountNeeded(int type) {
@@ -313,9 +362,9 @@ public int GetCountNeeded(int type) {
 			return ((players * CONVAR_MUTE_PERCENT.IntValue) / 100);
 		}
 				
-		case VOTE_SILENCE: {
+		/*case VOTE_SILENCE: {
 			return ((players * CONVAR_SILENCE_PERCENT.IntValue) / 100);
-		}
+		}*/
 		
 		default: {
 		
@@ -502,14 +551,14 @@ public void CheckCommand(int client, const char[] args, const char[] pref) {
 		return;
 	}
 	
-	if(StrEqual(command, SILENCE_COMMAND, false)) {
+	/*if(StrEqual(command, SILENCE_COMMAND, false)) {
 		if(CONVAR_SILENCE_ENABLE.IntValue < 1) {
 			return;
 		}
 	
 		ShowMenu(client,VOTE_SILENCE);
 		return;
-	}
+	}*/
 }
 
 
@@ -528,7 +577,7 @@ public bool HasImmunity(int client) {
 			return true;
 		}
 	}
-	
+
 	return false;
 	//CONVAR_IMMUNITY_FLAG
 }
@@ -602,14 +651,12 @@ public void DoAction(int client, int type) {
 	switch(type) {
 		case VOTE_BAN: {
 			ClearChoise(client);  // clear votes of players if kick or ban
-			
+			ClearVotesForClient(client, VOTE_BAN);
 			ServerCommand("sm_ban #%d %d \"Banned by Gamevoting (%N)\"", GetClientUserId(client), CONVAR_BAN_DURATION.IntValue, client);
-			
 		}
 		case VOTE_KICK: {
-			
 			ClearChoise(client); // clear votes of players if kick or ban
-			
+			ClearVotesForClient(client, VOTE_KICK);
 			PushKickedPlayer(client);
 		}
 		case VOTE_MUTE: {
@@ -617,15 +664,12 @@ public void DoAction(int client, int type) {
 			[SourceComms++] Usage: sm_mute <#userid|name> [time|0] [reason]
 			[SourceComms++] Usage: sm_mute <#userid|name> [reason]
 			*/
-			ServerCommand("sm_mute #%d %d \"Muted by Gamevoting (%N)\"", GetClientUserId(client), CONVAR_MUTE_DURATION.IntValue, client);
+			ClearVotesForClient(client, VOTE_MUTE);
+			ServerCommand("sm_silence #%d %d \"Muted by Gamevoting (%N)\"", GetClientUserId(client), CONVAR_MUTE_DURATION.IntValue, client);
 		}
-		case VOTE_SILENCE: {
-			/*
-			[SourceComms++] Usage: sm_silence <#userid|name> [time|0] [reason]
-			[SourceComms++] Usage: sm_silence <#userid|name> [reason]
-			*/
+		/*case VOTE_SILENCE: {
 			ServerCommand("sm_silence #%d %d \"Silenced by Gamevoting (%N)\"", GetClientUserId(client), CONVAR_SILENCE_DURATION.IntValue, client);
-		}
+		}*/
 	}
 	
 }
