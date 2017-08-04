@@ -692,7 +692,6 @@ public void StartVote(int client, int target, int type) {
 	VALID_PLAYER { VALID_TARGET {
 		g_startvote_delay = GetTime() + CONVAR_START_VOTE_DELAY.IntValue;
 
-
 		for(int i = 1; i <= MaxClients; i++) {
 			if(IsCorrectPlayer(i)) {
 				// start vote menus
@@ -724,7 +723,7 @@ public void StartVote(int client, int target, int type) {
 				mymenu.SetTitle(s_Menu);
 				mymenu.AddItem(s_typeInitiator,"Yes");
 				mymenu.AddItem("","No");
-				mymenu.Display(client, MENU_TIME_FOREVER);
+				mymenu.Display(i, MENU_TIME_FOREVER);
 			}
 		}
 
