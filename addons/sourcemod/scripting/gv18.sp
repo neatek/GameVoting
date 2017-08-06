@@ -23,6 +23,15 @@
 #define VALID_TARGET if(IsCorrectPlayer(target))
 #define EVENT_GET_PLAYER GetClientOfUserId(GetEventInt(event, "userid"));
 
+public Plugin myinfo =
+{
+	name = "GameVoting",
+	author = "Neatek",
+	description = "Simple sourcemod plugin for voting",
+	version = VERSION,
+	url = "https://github.com/neatek/GameVoting"
+};
+
 #define VOTE_BAN 1
 #define VOTE_KICK 2
 #define VOTE_MUTE 3
