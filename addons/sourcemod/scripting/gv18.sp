@@ -765,6 +765,8 @@ public void StartVote(int client, int target, int type) {
 	VALID_PLAYER { VALID_TARGET {
 		g_startvote_delay = GetTime() + CONVAR_START_VOTE_DELAY.IntValue;
 		
+		char s_logs[128];
+		
 		for(int i = 1; i <= MaxClients; i++) {
 			if(IsCorrectPlayer(i)) {
 				// start vote menus
@@ -782,28 +784,34 @@ public void StartVote(int client, int target, int type) {
 					case VOTE_BAN: {
 						FormatEx(s_Menu,sizeof(s_Menu),"GAMEVOTING - Ban %N?", target);
 						
+						if(strlen(s_logs) < 1) {
 						LOGS_ENABLED {
 							char auth[32],auth1[32];
 							player_steam(client, auth, sizeof(auth)); player_steam(target, auth1, sizeof(auth1));
-							LogToFile(LogFilePath, "Player %N(%s) started public vote for ban %N(%s).",  client, auth,target,auth1);
+							FormatEx(s_logs, sizeof(s_logs), "Player %N(%s) started public vote for ban %N(%s).",  client, auth,target,auth1);
+						}
 						}
 					}
 					case VOTE_KICK: {
 						FormatEx(s_Menu,sizeof(s_Menu),"GAMEVOTING - Kick %N?", target);
 						
+						if(strlen(s_logs) < 1) {
 						LOGS_ENABLED {
 							char auth[32],auth1[32];
 							player_steam(client, auth, sizeof(auth)); player_steam(target, auth1, sizeof(auth1));
-							LogToFile(LogFilePath, "Player %N(%s) started public vote for kick %N(%s).",  client, auth,target,auth1);
+							FormatEx(s_logs, sizeof(s_logs), "Player %N(%s) started public vote for kick %N(%s).",  client, auth,target,auth1);
+						}
 						}
 					}
 					case VOTE_MUTE: {
 						FormatEx(s_Menu,sizeof(s_Menu),"GAMEVOTING - Mute %N?", target);
 						
+						if(strlen(s_logs) < 1) {
 						LOGS_ENABLED {
 							char auth[32],auth1[32];
 							player_steam(client, auth, sizeof(auth)); player_steam(target, auth1, sizeof(auth1));
-							LogToFile(LogFilePath, "Player %N(%s) started public vote for mute %N(%s).",  client, auth,target,auth1);
+							FormatEx(s_logs,sizeof(s_logs), "Player %N(%s) started public vote for mute %N(%s).",  client, auth,target,auth1);
+						}
 						}
 					}
 					default: {
@@ -817,6 +825,8 @@ public void StartVote(int client, int target, int type) {
 				mymenu.Display(i, MENU_TIME_FOREVER);
 			}
 		}
+		
+		LogToFile(LogFilePath, s_logs);
 
 	} }
 }
