@@ -1,4 +1,4 @@
-# GameVoting 1.8.4
+# GameVoting 1.8.5
 Very simple (light) voting plugin Sourcemod.net for TF2, CSS, CSGO etc
 
 # How to Install
