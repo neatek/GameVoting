@@ -1,4 +1,4 @@
-#include <sourcemod>
+//#include <sourcemod>
 
 /***
 
@@ -13,14 +13,16 @@
 	https://discord.gg/J7eSXuU
 	
 ***/
-
-#define VERSION "1.8.4"
+#pragma semicolon 1
+#pragma newdecls required
+#define VERSION "1.8.5"
 // Boring to type it again and again
 #define EVENT_PARAMS Handle event, const char[] name, bool dontBroadcast
 //#define PLUGIN_DEBUG_MODE 1
 #define VALID_PLAYER if(IsCorrectPlayer(client))
 #define VALID_TARGET if(IsCorrectPlayer(target))
 #define EVENT_GET_PLAYER GetClientOfUserId(GetEventInt(event, "userid"));
+
 #define VOTE_BAN 1
 #define VOTE_KICK 2
 #define VOTE_MUTE 3
@@ -68,9 +70,13 @@
 #define CONVAR_FLAG_START_VOTE ConVars[4]
 #define CONVAR_START_VOTE_DELAY ConVars[9]
 #define CONVAR_START_VOTE_ENABLE ConVars[15]
+#define CONVAR_AUTHID_TYPE ConVars[18]
+#define CONVAR_ENABLE_LOGS ConVars[19]
+#define LOGS_ENABLED if(strlen(LogFilePath) > 0 && CONVAR_ENABLE_LOGS.IntValue > 0)
 
 int g_startvote_delay = 0;
 ConVar ConVars[20];
+char LogFilePath[512];
 enum ENUM_VOTE_CHOISE
 {
 	current_type,
@@ -91,6 +97,8 @@ public void register_ConVars() {
 	
 	CONVAR_VERSION = CreateConVar("sm_gamevoting_version", VERSION, "Version of gamevoting plugin. DISCORD - https://discord.gg/J7eSXuU , Author: Neatek, www.neatek.ru", FCVAR_SPONLY|FCVAR_REPLICATED|FCVAR_NOTIFY);
 	CONVAR_ENABLED = CreateConVar("gamevoting_enable",	"1", "Enable or disable plugin (def:1)", _, true, 0.0, true, 1.0);	
+	CONVAR_AUTHID_TYPE = CreateConVar("gamevoting_authid",		"1",	"AuthID type, 1 - AuthId_Engine, 2 - AuthId_Steam2, 3 - AuthId_Steam3, 4 - AuthId_SteamID64 (def:1)", _, true, 1.0, true, 4.0);
+	CONVAR_ENABLE_LOGS = CreateConVar("gamevoting_logs",		"1",	"Enable or disable logs for plugin (def:1)", _, true, 0.0, true, 1.0);
 
 	// min players
 	CONVAR_MIN_PLAYERS = CreateConVar("gamevoting_players",	"8",	"Minimum players need to enable votes (def:8)", _, true, 0.0, true, 20.0);
@@ -115,7 +123,7 @@ public void register_ConVars() {
 	//CONVAR_SILENCE_PERCENT = CreateConVar("gamevoting_votesilence_percent",	 "75",	"Needed percent of players for silence someone (def:75)", _, true, 0.0, true, 100.0);
 	
 	// Immunity flags
-	CONVAR_IMMUNITY_FLAG = CreateConVar("gamevoting_immunity_flag",	"a",	"Immunity flag from all votes (def:a)");
+	CONVAR_IMMUNITY_FLAG = CreateConVar("gamevoting_immunity_flag",	"a",	"Immunity flag from all votes, set empty for disable immunity (def:a)");
 	CONVAR_IMMUNITY_zFLAG = CreateConVar("gamevoting_immunity_zflag",	"1",	"Immunity for admin flag \"z\"");
 
 	CONVAR_START_VOTE_ENABLE = CreateConVar("gamevoting_startvote_enable", "1", "Disable of enable public votes (def:1)", _, true, 0.0, true, 1.0);
@@ -131,6 +139,33 @@ public void OnPluginStart() {
 	// Events
 	HookEvent("player_disconnect", Event_PlayerDisconnected);
 	register_ConVars();
+	GVInitLog();
+}
+
+public void OnPluginEnd() {
+	UnhookEvent("player_disconnect", Event_PlayerDisconnected);
+}
+
+//LogToFile(LogFilePath, "Player %N(%s) was ungagged.",  client, player.steam(client));
+public void GVInitLog() {
+	if(CONVAR_ENABLE_LOGS.IntValue < 1) {
+		return;
+	}
+
+	BuildPath(Path_SM, LogFilePath, sizeof(LogFilePath), "/logs/gamevoting/");
+	if(DirExists(LogFilePath)) {
+		char ftime[32];
+		FormatTime(ftime, sizeof(ftime), "logs/gamevoting/gv%m-%d.txt",  GetTime());
+		BuildPath(Path_SM, LogFilePath, sizeof(LogFilePath), ftime);
+
+		#if defined PLUGIN_DEBUG_MODE
+			LogMessage("log file for GameVoting: %s", LogFilePath);
+		#endif
+	}
+	else {
+		LogError("Error! Folder /logs/gamevoting/ doesnt exists! Please, create it to enable logs.");
+		strcopy(LogFilePath,sizeof(LogFilePath), "");
+	}
 }
 
 public int FindFreeSlot() {
@@ -182,7 +217,8 @@ public void ClearVotesForClient(int client, int type) {
 	VALID_PLAYER {
 		
 		char auth[32];
-		GetClientAuthId(client, AuthId_Engine, auth, sizeof(auth));
+		//GetClientAuthId(client, AuthId_Engine, auth, sizeof(auth));
+		player_steam(client, auth, sizeof(auth));
 		
 		for(int i =0 ; i <= MAXPLAYERS; i ++) {
 			
@@ -233,7 +269,8 @@ public void PushKickedPlayer(int client) {
 			#endif
 			
 			char auth[32];
-			GetClientAuthId(client, AuthId_Engine, auth, sizeof(auth));
+			//GetClientAuthId(client, AuthId_Engine, auth, sizeof(auth));
+			player_steam(client, auth, sizeof(auth));
 			
 			strcopy(g_KickedPlayers[client][Steam], 32, auth);
 			
@@ -248,7 +285,8 @@ public void PushKickedPlayer(int client) {
 public int KickedPlayer(int client) {
 	VALID_PLAYER {
 		char auth[32];
-		GetClientAuthId(client, AuthId_Engine, auth, sizeof(auth));
+		//GetClientAuthId(client, AuthId_Engine, auth, sizeof(auth));
+		player_steam(client, auth, sizeof(auth));
 		
 		for(int i =0 ; i <= MAXPLAYERS; i ++) {
 			if(StrEqual(g_KickedPlayers[i][Steam],auth,true)) {
@@ -290,7 +328,8 @@ public int GetCountVotes(int client, int type) {
 		int i_Counted = 0;
 	
 		char auth[32];
-		GetClientAuthId(client, AuthId_Engine, auth, sizeof(auth));
+		//GetClientAuthId(client, AuthId_Engine, auth, sizeof(auth));
+		player_steam(client, auth, sizeof(auth));
 	
 		for(int target = 0; target <= MAXPLAYERS; target++) {
 			VALID_TARGET {
@@ -391,7 +430,8 @@ public void SetChoise(int type, int client, int target) {
 		VALID_TARGET {
 		
 			char auth[32];
-			GetClientAuthId(target, AuthId_Engine, auth, sizeof(auth));
+			//GetClientAuthId(target, AuthId_Engine, auth, sizeof(auth));
+			player_steam(target, auth, sizeof(auth));
 			
 			int needed = GetCountNeeded(type);
 			if(needed == -1) 
@@ -405,25 +445,53 @@ public void SetChoise(int type, int client, int target) {
 					strcopy(VAR_VOTEBAN, 32, auth);
 					current = GetCountVotes(target, VOTE_BAN);
 					PrintToChatAll("Player %N voted for ban %N. (%d/%d)", client, target, current, needed);
+					
+					LOGS_ENABLED {
+						char auth1[32];//,auth2[32];
+						player_steam(client, auth1, sizeof(auth1)); 
+						//player_steam(target, auth2, sizeof(auth1));
+						LogToFile(LogFilePath, "Player %N(%s) voted for ban %N(%s). (%d/%d)",  client, auth1, target, auth, current, needed);
+					}
 				}
 				
 				case VOTE_KICK: {
 					strcopy(VAR_VOTEKICK, 32, auth);
 					current = GetCountVotes(target, VOTE_KICK);
 					PrintToChatAll("Player %N voted for kick %N. (%d/%d)", client, target, current, needed);
+					
+					LOGS_ENABLED {
+						char auth1[32];//,auth2[32];
+						player_steam(client, auth1, sizeof(auth1)); 
+						//player_steam(target, auth2, sizeof(auth1));
+						LogToFile(LogFilePath, "Player %N(%s) voted for kick %N(%s). (%d/%d)",  client, auth1, target, auth, current, needed);
+					}
 				}
 				
 				case VOTE_MUTE: {
 					strcopy(VAR_VOTEMUTE, 32, auth);
 					current = GetCountVotes(target, VOTE_MUTE);
 					PrintToChatAll("Player %N voted for mute %N. (%d/%d)", client, target, current, needed);
+					
+					LOGS_ENABLED {
+						char auth1[32];//,auth2[32];
+						player_steam(client, auth1, sizeof(auth1)); 
+						//player_steam(target, auth2, sizeof(auth1));
+						LogToFile(LogFilePath, "Player %N(%s) voted for mute %N(%s). (%d/%d)",  client, auth1, target, auth, current, needed);
+					}
 				}
 				
-				case VOTE_SILENCE: {
+				/*case VOTE_SILENCE: {
 					strcopy(VAR_VOTESILENCE, 32, auth);
 					current = GetCountVotes(target, VOTE_SILENCE);
 					PrintToChatAll("Player %N voted for silence %N. (%d/%d)", client, target, current, needed);
-				}
+					
+					LOGS_ENABLED {
+						char auth1[32];//,auth2[32];
+						player_steam(client, auth1, sizeof(auth1)); 
+						//player_steam(target, auth2, sizeof(auth1));
+						LogToFile(LogFilePath, "Player %N(%s) voted for mute %N(%s). (%d/%d)",  client, auth1, target, auth, current, needed);
+					}
+				}*/
 				
 				default: {
 					return;
@@ -595,7 +663,7 @@ public bool StartVoteFlag(int client) {
 		return true;
 	}
 	
-	new b_flags = ReadFlagString(s_flag);
+	int b_flags = ReadFlagString(s_flag);
 	if ((GetUserFlagBits(client) & b_flags) == b_flags) {
 		return true;
 	}
@@ -606,7 +674,12 @@ public bool StartVoteFlag(int client) {
 public bool HasImmunity(int client) {
 	char s_flag[11];
 	GetConVarString(CONVAR_IMMUNITY_FLAG, s_flag, sizeof(s_flag));
-	new b_flags = ReadFlagString(s_flag);
+	
+	if(strlen(s_flag) < 1) {
+		return false;
+	}
+	
+	int b_flags = ReadFlagString(s_flag);
 	#if defined PLUGIN_DEBUG_MODE
 	//	PrintToChatAll("flag - %s", s_flag);
 	#endif
@@ -624,7 +697,7 @@ public bool HasImmunity(int client) {
 }
 
 // Show ban&kick&mute&silence menu
-public ShowMenu(int client, int type) {
+public void ShowMenu(int client, int type) {
 	#if defined PLUGIN_DEBUG_MODE
 		PrintToChatAll("Inited menu for client - %N [#%d]", client, type);
 	#endif
@@ -691,7 +764,7 @@ public void StartVote(int client, int target, int type) {
 
 	VALID_PLAYER { VALID_TARGET {
 		g_startvote_delay = GetTime() + CONVAR_START_VOTE_DELAY.IntValue;
-
+		
 		for(int i = 1; i <= MaxClients; i++) {
 			if(IsCorrectPlayer(i)) {
 				// start vote menus
@@ -708,12 +781,30 @@ public void StartVote(int client, int target, int type) {
 				switch(VAR_CTYPE) {
 					case VOTE_BAN: {
 						FormatEx(s_Menu,sizeof(s_Menu),"GAMEVOTING - Ban %N?", target);
+						
+						LOGS_ENABLED {
+							char auth[32],auth1[32];
+							player_steam(client, auth, sizeof(auth)); player_steam(target, auth1, sizeof(auth1));
+							LogToFile(LogFilePath, "Player %N(%s) started public vote for ban %N(%s).",  client, auth,target,auth1);
+						}
 					}
 					case VOTE_KICK: {
 						FormatEx(s_Menu,sizeof(s_Menu),"GAMEVOTING - Kick %N?", target);
+						
+						LOGS_ENABLED {
+							char auth[32],auth1[32];
+							player_steam(client, auth, sizeof(auth)); player_steam(target, auth1, sizeof(auth1));
+							LogToFile(LogFilePath, "Player %N(%s) started public vote for kick %N(%s).",  client, auth,target,auth1);
+						}
 					}
 					case VOTE_MUTE: {
 						FormatEx(s_Menu,sizeof(s_Menu),"GAMEVOTING - Mute %N?", target);
+						
+						LOGS_ENABLED {
+							char auth[32],auth1[32];
+							player_steam(client, auth, sizeof(auth)); player_steam(target, auth1, sizeof(auth1));
+							LogToFile(LogFilePath, "Player %N(%s) started public vote for mute %N(%s).",  client, auth,target,auth1);
+						}
 					}
 					default: {
 						FormatEx(s_Menu,sizeof(s_Menu),"GAMEVOTING?");
@@ -788,6 +879,38 @@ public int menu_handler(Menu menu, MenuAction action, int client, int item) {
 	}
 }
 
+public void player_steam(int client, char[] steam_id, int size) {
+	char auth[32];
+	switch(CONVAR_AUTHID_TYPE.IntValue)
+	{
+		case 1: {
+			if(GetClientAuthId(client, AuthId_Engine, auth, sizeof(auth))) {
+				Format(steam_id,size,auth);
+			}
+				
+		}
+		case 2: {
+			if(GetClientAuthId(client, AuthId_Steam2, auth, sizeof(auth))) {
+				Format(steam_id,size,auth);
+			}
+				
+		}
+		case 3:  {
+			if(GetClientAuthId(client, AuthId_Steam3, auth, sizeof(auth))) {
+				Format(steam_id,size,auth);
+			}
+				
+		}
+		case 4:  {
+			if(GetClientAuthId(client, AuthId_SteamID64, auth, sizeof(auth))) {
+				Format(steam_id,size,auth);
+			}
+				
+		}
+	}
+	//return auth;
+}
+
 // do action 
 public void DoAction(int client, int type, int last) {
 	
@@ -795,11 +918,25 @@ public void DoAction(int client, int type, int last) {
 		case VOTE_BAN: {
 			ClearChoise(client);  // clear votes of players if kick or ban
 			ClearVotesForClient(client, VOTE_BAN);
+			
+			LOGS_ENABLED {
+				char auth[32];
+				player_steam(client, auth, sizeof(auth));
+				LogToFile(LogFilePath, "Player %N(%s) was banned by voting. (Last voted player: %N)",  client, auth,last);
+			}
+
 			ServerCommand("sm_ban #%d %d \"Banned by Gamevoting (%N)\"", GetClientUserId(client), CONVAR_BAN_DURATION.IntValue, last);
 		}
 		case VOTE_KICK: {
 			ClearChoise(client); // clear votes of players if kick or ban
 			ClearVotesForClient(client, VOTE_KICK);
+			
+			LOGS_ENABLED {
+				char auth[32];
+				player_steam(client, auth, sizeof(auth));
+				LogToFile(LogFilePath, "Player %N(%s) was kicked by voting. (Last voted player: %N)",  client, auth,last);
+			}
+
 			PushKickedPlayer(client);
 		}
 		case VOTE_MUTE: {
@@ -808,7 +945,15 @@ public void DoAction(int client, int type, int last) {
 			[SourceComms++] Usage: sm_mute <#userid|name> [reason]
 			*/
 			ClearVotesForClient(client, VOTE_MUTE);
+			
+			LOGS_ENABLED {
+				char auth[32];
+				player_steam(client, auth, sizeof(auth));
+				LogToFile(LogFilePath, "Player %N(%s) was muted by voting. (Last voted player: %N)",  client, auth,last);
+			}
+
 			ServerCommand("sm_silence #%d %d \"Muted by Gamevoting (%N)\"", GetClientUserId(client), CONVAR_MUTE_DURATION.IntValue, last);
+			
 		}
 		/*case VOTE_SILENCE: {
 			ServerCommand("sm_silence #%d %d \"Silenced by Gamevoting (%N)\"", GetClientUserId(client), CONVAR_SILENCE_DURATION.IntValue, client);
