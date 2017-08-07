@@ -1,4 +1,4 @@
-# GameVoting 1.8.5
+# GameVoting 1.8.6
 Very simple (light) voting plugin Sourcemod.net for TF2, CSS, CSGO etc
 
 # How to Install
@@ -17,7 +17,7 @@ https://www.paypal.me/neatek
 
 # Will be released:
 - RELEASED 04.08.2017 - start voting by command for all users using menus. (voteban - yes/no)
-- translations.
-- improvements.
+- RELEASED 07.08.2017 - translations.
+- RELEASED 07.08.2017 - improvements.
+- RELEASED 07.08.2017 -bug fixes.
 - chat colors.
-- bug fixes.
