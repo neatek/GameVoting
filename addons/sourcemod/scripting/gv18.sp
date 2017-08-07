@@ -15,7 +15,7 @@
 ***/
 #pragma semicolon 1
 #pragma newdecls required
-#define VERSION "1.8.5"
+#define VERSION "1.8.6"
 // Boring to type it again and again
 #define EVENT_PARAMS Handle event, const char[] name, bool dontBroadcast
 //#define PLUGIN_DEBUG_MODE 1
@@ -140,6 +140,7 @@ public void register_ConVars() {
 	CONVAR_START_VOTE_DELAY = CreateConVar("gamevoting_startvote_delay", "20", "Delay between public votes in seconds (def:20)", _, true, 0.0, false);
 	
 	AutoExecConfig(true, "Gamevoting");
+	LoadTranslations("phrases.gv18");
 }
 
 public void OnPluginStart() {
@@ -453,7 +454,11 @@ public void SetChoise(int type, int client, int target) {
 				case VOTE_BAN: {
 					strcopy(VAR_VOTEBAN, 32, auth);
 					current = GetCountVotes(target, VOTE_BAN);
-					PrintToChatAll("Player %N voted for ban %N. (%d/%d)", client, target, current, needed);
+					//PrintToChatAll("Player %N voted for ban %N. (%d/%d)", client, target, current, needed);
+					char c_name[32],t_name[32];
+					GetClientName(client, c_name, sizeof(c_name));
+					GetClientName(target, t_name, sizeof(t_name));
+					PrintToChatAll("[GameVoting] %t", "gv_voted_for_ban", c_name, t_name, current, needed);
 					
 					LOGS_ENABLED {
 						char auth1[32];//,auth2[32];
@@ -466,7 +471,11 @@ public void SetChoise(int type, int client, int target) {
 				case VOTE_KICK: {
 					strcopy(VAR_VOTEKICK, 32, auth);
 					current = GetCountVotes(target, VOTE_KICK);
-					PrintToChatAll("Player %N voted for kick %N. (%d/%d)", client, target, current, needed);
+					char c_name[32],t_name[32];
+					GetClientName(client, c_name, sizeof(c_name));
+					GetClientName(target, t_name, sizeof(t_name));
+					//PrintToChatAll("Player %N voted for kick %N. (%d/%d)", client, target, current, needed);
+					PrintToChatAll("[GameVoting] %t", "gv_voted_for_kick", c_name, t_name, current, needed);
 					
 					LOGS_ENABLED {
 						char auth1[32];//,auth2[32];
@@ -479,7 +488,11 @@ public void SetChoise(int type, int client, int target) {
 				case VOTE_MUTE: {
 					strcopy(VAR_VOTEMUTE, 32, auth);
 					current = GetCountVotes(target, VOTE_MUTE);
-					PrintToChatAll("Player %N voted for mute %N. (%d/%d)", client, target, current, needed);
+					char c_name[32],t_name[32];
+					GetClientName(client, c_name, sizeof(c_name));
+					GetClientName(target, t_name, sizeof(t_name));
+					//PrintToChatAll("Player %N voted for mute %N. (%d/%d)", client, target, current, needed);
+					PrintToChatAll("[GameVoting] %t", "gv_voted_for_mute", c_name, t_name, current, needed);
 					
 					LOGS_ENABLED {
 						char auth1[32];//,auth2[32];
@@ -488,20 +501,7 @@ public void SetChoise(int type, int client, int target) {
 						LogToFile(LogFilePath, "Player %N(%s) voted for mute %N(%s). (%d/%d)",  client, auth1, target, auth, current, needed);
 					}
 				}
-				
-				/*case VOTE_SILENCE: {
-					strcopy(VAR_VOTESILENCE, 32, auth);
-					current = GetCountVotes(target, VOTE_SILENCE);
-					PrintToChatAll("Player %N voted for silence %N. (%d/%d)", client, target, current, needed);
-					
-					LOGS_ENABLED {
-						char auth1[32];//,auth2[32];
-						player_steam(client, auth1, sizeof(auth1)); 
-						//player_steam(target, auth2, sizeof(auth1));
-						LogToFile(LogFilePath, "Player %N(%s) voted for mute %N(%s). (%d/%d)",  client, auth1, target, auth, current, needed);
-					}
-				}*/
-				
+
 				default: {
 					return;
 				}
@@ -563,10 +563,6 @@ public Action OnClientSayCommand(int client, const char[] command, const char[] 
 {
 	VALID_PLAYER {
 		
-		#if defined PLUGIN_DEBUG_MODE
-		//	LogMessage("sArgs : %s", sArgs);
-		//	PrintToChatAll("sArgs : %s", sArgs);
-		#endif
 		
 		if(sArgs[0] == '!' && sArgs[1] == 'v' && sArgs[2] == 'o' && sArgs[3] == 't' && sArgs[4] == 'e') 
 			CheckCommand(client, sArgs, "!");
@@ -588,11 +584,6 @@ public void CheckCommand(int client, const char[] args, const char[] pref) {
 	strcopy(command, sizeof(command), args);
 	TrimString(command);
 	
-	#if defined PLUGIN_DEBUG_MODE
-	//	LogMessage("command : %s", command);
-	//	PrintToChatAll("command : %s", command);
-	//	HasImmunity(client);
-	#endif
 	
 	if(strlen(pref) > 0) {
 		ReplaceString(command, sizeof(command), pref, "", true);
@@ -603,7 +594,8 @@ public void CheckCommand(int client, const char[] args, const char[] pref) {
 	}
 
 	if(CountPlayers() < CONVAR_MIN_PLAYERS.IntValue) {
-		PrintToChat(client, "[GameVoting] Minimum players for voting - %d.", CONVAR_MIN_PLAYERS.IntValue);
+		//PrintToChat(client, "[GameVoting] Minimum players for voting - %d.", CONVAR_MIN_PLAYERS.IntValue);
+		PrintToChat(client, "[GameVoting] %t", "gv_min_players", CONVAR_MIN_PLAYERS.IntValue);
 		return;
 	}
 	
@@ -655,16 +647,11 @@ public bool StartVoteFlag(int client) {
 	char s_flag[11];
 	GetConVarString(CONVAR_FLAG_START_VOTE, s_flag, sizeof(s_flag));
 	
-	#if defined PLUGIN_DEBUG_MODE
-		PrintToChatAll("flag - %s", s_flag);
-	#endif
-	
-	#if defined PLUGIN_DEBUG_MODE
-		PrintToChatAll("%d > %d [%d]", (g_startvote_delay), GetTime(), ( (g_startvote_delay) - GetTime()  )  );
-	#endif
+
 
 	if(g_startvote_delay > GetTime() && CONVAR_START_VOTE_ENABLE.IntValue > 0 ) {
-		PrintToChat(client, "[GameVoting] Please wait %dsec before start public vote.", ((g_startvote_delay)-GetTime()) );
+		//PrintToChat(client, "[GameVoting] Please wait %dsec before start public vote.", ((g_startvote_delay)-GetTime()) );
+		PrintToChat(client, "[GameVoting] %t", "gv_wait_before_startvote", ((g_startvote_delay)-GetTime()));
 		return false;
 	}
 	
@@ -689,9 +676,7 @@ public bool HasImmunity(int client) {
 	}
 	
 	int b_flags = ReadFlagString(s_flag);
-	#if defined PLUGIN_DEBUG_MODE
-	//	PrintToChatAll("flag - %s", s_flag);
-	#endif
+
 	if ((GetUserFlagBits(client) & b_flags) == b_flags) {
 		return true;
 	}
@@ -707,9 +692,7 @@ public bool HasImmunity(int client) {
 
 // Show ban&kick&mute&silence menu
 public void ShowMenu(int client, int type) {
-	#if defined PLUGIN_DEBUG_MODE
-		PrintToChatAll("Inited menu for client - %N [#%d]", client, type);
-	#endif
+
 	VALID_PLAYER {
 	
 		if(CountPlayers() < 2)
@@ -723,9 +706,6 @@ public void ShowMenu(int client, int type) {
 			mymenu = new Menu(menu_handler);
 		}
 		else {
-			#if defined PLUGIN_DEBUG_MODE
-				PrintToChatAll("StartVoteFlag() == true");
-			#endif
 			
 			if(CONVAR_START_VOTE_ENABLE.IntValue > 0)
 				mymenu = new Menu(startvote_menu_player_handler);
@@ -733,23 +713,32 @@ public void ShowMenu(int client, int type) {
 				mymenu = new Menu(menu_handler);
 		}
 		
+		char s_mtitle[48];
+		
+		
 		switch(type) {
 			case VOTE_BAN: {
-				mymenu.SetTitle("GAMEVOTING - BAN");
+				//mymenu.SetTitle("GAMEVOTING - BAN");
+				Format(s_mtitle, sizeof(s_mtitle), "GAMEVOTING - %T", "gv_ban_title", client);
 			}
 			case VOTE_KICK: {
-				mymenu.SetTitle("GAMEVOTING - KICK");
+				//mymenu.SetTitle("GAMEVOTING - KICK");
+				Format(s_mtitle, sizeof(s_mtitle), "GAMEVOTING - %T", "gv_kick_title", client);
 			}
 			case VOTE_MUTE: {
-				mymenu.SetTitle("GAMEVOTING - MUTE");
+				//mymenu.SetTitle("GAMEVOTING - MUTE");
+				Format(s_mtitle, sizeof(s_mtitle), "GAMEVOTING - %T", "gv_mute_title", client);
 			}
-			case VOTE_SILENCE: {
-				mymenu.SetTitle("GAMEVOTING - SILENCE");
-			}
+			//case VOTE_SILENCE: {
+				//mymenu.SetTitle("GAMEVOTING - SILENCE");
+			//}
 			default: {
-				mymenu.SetTitle("GAMEVOTING");
+				//mymenu.SetTitle("GAMEVOTING");
+				Format(s_mtitle, sizeof(s_mtitle), "GAMEVOTING");
 			}	
 		}
+		
+		mymenu.SetTitle(s_mtitle);
 		
 		//mymenu.AddItem("-1", "\nSELECT TARGET PLAYER", ITEMDRAW_RAWLINE|ITEMDRAW_DISABLED);
 
@@ -775,6 +764,8 @@ public void StartVote(int client, int target, int type) {
 		g_startvote_delay = GetTime() + CONVAR_START_VOTE_DELAY.IntValue;
 		
 		char s_logs[128];
+		char t_name[32];
+		GetClientName(target, t_name, sizeof(t_name));
 		
 		for(int i = 1; i <= MaxClients; i++) {
 			if(IsCorrectPlayer(i)) {
@@ -784,14 +775,11 @@ public void StartVote(int client, int target, int type) {
 				// client, target, type / explode
 				FormatEx(s_typeInitiator,sizeof(s_typeInitiator),"%d|%d|%d",client,target,VAR_CTYPE);
 				
-				#if defined PLUGIN_DEBUG_MODE
-					PrintToChatAll("%s", s_typeInitiator);
-				#endif
-				
 				char s_Menu[86];
 				switch(VAR_CTYPE) {
 					case VOTE_BAN: {
-						FormatEx(s_Menu,sizeof(s_Menu),"GAMEVOTING - Ban %N?", target);
+						//FormatEx(s_Menu,sizeof(s_Menu),"GAMEVOTING - Ban %N?", target);
+						Format(s_Menu, sizeof(s_Menu), "GAMEVOTING - %T", "gv_ban_title_question", i, t_name);
 						
 						if(strlen(s_logs) < 1) {
 						LOGS_ENABLED {
@@ -802,7 +790,8 @@ public void StartVote(int client, int target, int type) {
 						}
 					}
 					case VOTE_KICK: {
-						FormatEx(s_Menu,sizeof(s_Menu),"GAMEVOTING - Kick %N?", target);
+						//FormatEx(s_Menu,sizeof(s_Menu),"GAMEVOTING - Kick %N?", target);
+						Format(s_Menu, sizeof(s_Menu), "GAMEVOTING - %T", "gv_kick_title_question", i, t_name);
 						
 						if(strlen(s_logs) < 1) {
 						LOGS_ENABLED {
@@ -813,7 +802,8 @@ public void StartVote(int client, int target, int type) {
 						}
 					}
 					case VOTE_MUTE: {
-						FormatEx(s_Menu,sizeof(s_Menu),"GAMEVOTING - Mute %N?", target);
+						//FormatEx(s_Menu,sizeof(s_Menu),"GAMEVOTING - Mute %N?", target);
+						Format(s_Menu, sizeof(s_Menu), "GAMEVOTING - %T", "gv_mute_title_question", i, t_name);
 						
 						if(strlen(s_logs) < 1) {
 						LOGS_ENABLED {
@@ -829,8 +819,18 @@ public void StartVote(int client, int target, int type) {
 					}	
 				}
 				mymenu.SetTitle(s_Menu);
-				mymenu.AddItem(s_typeInitiator,"Yes");
-				mymenu.AddItem("","No");
+				
+				mymenu.AddItem("","----", ITEMDRAW_DISABLED);
+				mymenu.AddItem("","----", ITEMDRAW_DISABLED);
+				
+				Format(s_Menu, sizeof(s_Menu), "%T", "gv_yes", i);
+				
+				mymenu.AddItem(s_typeInitiator,s_Menu);
+				
+				Format(s_Menu, sizeof(s_Menu), "%T", "gv_no", i);
+				
+				mymenu.AddItem("",s_Menu);
+				
 				mymenu.Display(i, MENU_TIME_FOREVER);
 			}
 		}
@@ -858,17 +858,14 @@ public int startvote_menu_player_handler(Menu menu, MenuAction action, int clien
 // action startvote
 public int menu_startvote_action_handler(Menu menu, MenuAction action, int client, int item) {
 	if (action == MenuAction_Select) {
-		#if defined PLUGIN_DEBUG_MODE
-			PrintToChatAll("menu_startvote_action_handler()");
-		#endif
 		char info[48];
 		GetMenuItem(menu, item, info, sizeof(info));
+		
+		if(strlen(info) > 0) 
+		{
+		
 		char ex[3][11];
 		ExplodeString(info, "|", ex, 3, 11);
-		
-		#if defined PLUGIN_DEBUG_MODE
-			PrintToChatAll("startvote_menu_handler / info %s", info);
-		#endif
 
 		//int initiator = StringToInt(ex[0]);
 		int target = StringToInt(ex[1]);
@@ -876,6 +873,8 @@ public int menu_startvote_action_handler(Menu menu, MenuAction action, int clien
 
 		VALID_TARGET {
 			SetChoise(type, client, target);
+		}
+		
 		}
 	}
 	else if (action == MenuAction_End) {
