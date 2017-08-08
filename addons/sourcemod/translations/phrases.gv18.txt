@@ -5,72 +5,85 @@
 		"#format" "{1:s},{2:s},{3:d},{4:d}"
 		"en" "Player {1} voted for ban {2}. ({3}/{4})"
 		"ru" "{1} хочет забанить {2}. ({3}/{4})"
+		"fr" "Le joueur {1} a voté pour le bannissement de {2}. ({3} / {4})"
 	}
 	"gv_voted_for_kick"
 	{
 		"#format" "{1:s},{2:s},{3:d},{4:d}"
 		"en" "Player {1} voted for kick {2}. ({3}/{4})"
 		"ru" "{1} хочет кикнуть {2}. ({3}/{4})"
+		"fr" "Le joueur {1} a voté pour exclure {2}. ({3} / {4})"
 	}
 	"gv_voted_for_mute"
 	{
 		"#format" "{1:s},{2:s},{3:d},{4:d}"
 		"en" "Player {1} voted for mute {2}. ({3}/{4})"
 		"ru" "{1} хочет замьютить {2}. ({3}/{4})"
+		"fr" "Le joueur {1} a voté pour le mute de {2}. ({3} / {4})"
 	}
 	"gv_wait_before_startvote"
 	{
 		"#format" "{1:d}"
 		"en" "Please wait {1}sec before start public vote."
 		"ru" "Пожалуйста подождите {1}сек до старта голосования."
+		"fr" "Veuillez patienter {1} sec avant de commencer le vote public."
 	}
 	"gv_min_players"
 	{
 		"#format" "{1:d}"
 		"en" "Minimum players for voting - {1}."
 		"ru" "Минимальное количество игроков для голосования - {1}."
+		"fr" "Le minimum de joueur pour le vote doit être de  - {1}. "
 	}
 	"gv_ban_title"
 	{
 		"en" "BAN"
 		"ru" "БАН"
+		"fr" "BANNIR"
 	}
 	"gv_kick_title"
 	{
 		"en" "KICK"
 		"ru" "КИК"
+		"fr" "EXCLURE"
 	}
 	"gv_mute_title"
 	{
 		"en" "MUTE"
 		"ru" "МУТ"
+		"fr" "MUTE"
 	}
 	"gv_ban_title_question"
 	{
 		"#format" "{1:s}"
 		"en" "BAN {1}?"
 		"ru" "ЗАБАНИТЬ {1}?"
+		"fr" "BANNIR {1}?"
 	}
 	"gv_kick_title_question"
 	{
 		"#format" "{1:s}"
 		"en" "KICK {1}?"
 		"ru" "КИКНУТЬ {1}?"
+		"fr" "EXCLURE {1}?"
 	}
 	"gv_mute_title_question"
 	{
 		"#format" "{1:s}"
 		"en" "MUTE {1}?"
 		"ru" "ЗАМЬЮТИТЬ {1}?"
+		"fr" "MUTE {1}?"
 	}
 	"gv_yes"
 	{
 		"en" "Yes"
 		"ru" "Да"
+		"fr" "Oui"
 	}
 	"gv_no"
 	{
 		"en" "No"
 		"ru" "Нет"
+		"fr" "Non"
 	}
 }
