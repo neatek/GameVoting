@@ -5,21 +5,24 @@
 		"#format" "{1:s},{2:s},{3:d},{4:d}"
 		"en" "Player {1} voted for ban {2}. ({3}/{4})"
 		"ru" "{1} хочет забанить {2}. ({3}/{4})"
-		"fr" "Le joueur {1} a voté pour le bannissement de {2}. ({3} / {4})"
+		"fr" "Le joueur {1} a voté pour le bannissement de {2}. ({3}/{4})"
+		"es" "El jugador {1} vota para banear a {2}. ({3}/{4}) votos requeridos."
 	}
 	"gv_voted_for_kick"
 	{
 		"#format" "{1:s},{2:s},{3:d},{4:d}"
 		"en" "Player {1} voted for kick {2}. ({3}/{4})"
 		"ru" "{1} хочет кикнуть {2}. ({3}/{4})"
-		"fr" "Le joueur {1} a voté pour exclure {2}. ({3} / {4})"
+		"fr" "Le joueur {1} a voté pour exclure {2}. ({3}/{4})"
+		"es" "El jugador {1} vota para kickear a {2}. ({3}/{4}) votos requeridos."
 	}
 	"gv_voted_for_mute"
 	{
 		"#format" "{1:s},{2:s},{3:d},{4:d}"
 		"en" "Player {1} voted for mute {2}. ({3}/{4})"
 		"ru" "{1} хочет замьютить {2}. ({3}/{4})"
-		"fr" "Le joueur {1} a voté pour le mute de {2}. ({3} / {4})"
+		"fr" "Le joueur {1} a voté pour le mute de {2}. ({3}/{4})"
+		"es" "El jugador {1} vota para mutear a {2}. ({3}/{4}) votos requeridos."
 	}
 	"gv_wait_before_startvote"
 	{
@@ -27,31 +30,36 @@
 		"en" "Please wait {1}sec before start public vote."
 		"ru" "Пожалуйста подождите {1}сек до старта голосования."
 		"fr" "Veuillez patienter {1} sec avant de commencer le vote public."
+		"es" "Porfavor espera {1} segundos antes de empezar una votación."
 	}
 	"gv_min_players"
 	{
 		"#format" "{1:d}"
 		"en" "Minimum players for voting - {1}."
 		"ru" "Минимальное количество игроков для голосования - {1}."
-		"fr" "Le minimum de joueur pour le vote doit être de  - {1}. "
+		"fr" "Le minimum de joueur pour le vote doit être de  - {1}."
+		"es" "Jugadores mínimos para empezar una votación - {1}."
 	}
 	"gv_ban_title"
 	{
 		"en" "BAN"
 		"ru" "БАН"
 		"fr" "BANNIR"
+		"es" "BAN"
 	}
 	"gv_kick_title"
 	{
 		"en" "KICK"
 		"ru" "КИК"
 		"fr" "EXCLURE"
+		"es" "KICK"
 	}
 	"gv_mute_title"
 	{
 		"en" "MUTE"
 		"ru" "МУТ"
 		"fr" "MUTE"
+		"es" "MUTE"
 	}
 	"gv_ban_title_question"
 	{
@@ -59,6 +67,7 @@
 		"en" "BAN {1}?"
 		"ru" "ЗАБАНИТЬ {1}?"
 		"fr" "BANNIR {1}?"
+		"es" "BANEAR A {1}?"
 	}
 	"gv_kick_title_question"
 	{
@@ -66,6 +75,7 @@
 		"en" "KICK {1}?"
 		"ru" "КИКНУТЬ {1}?"
 		"fr" "EXCLURE {1}?"
+		"es" "KICKEAR A {1}?"
 	}
 	"gv_mute_title_question"
 	{
@@ -73,17 +83,20 @@
 		"en" "MUTE {1}?"
 		"ru" "ЗАМЬЮТИТЬ {1}?"
 		"fr" "MUTE {1}?"
+		"es" "MUTEAR A {1}?"
 	}
 	"gv_yes"
 	{
 		"en" "Yes"
 		"ru" "Да"
 		"fr" "Oui"
+		"es" "Si"
 	}
 	"gv_no"
 	{
 		"en" "No"
 		"ru" "Нет"
 		"fr" "Non"
+		"es" "No"
 	}
 }
