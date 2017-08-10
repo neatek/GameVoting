@@ -5,7 +5,7 @@
 		"#format" "{1:s},{2:s},{3:d},{4:d}"
 		"en" "Player {1} voted for ban {2}. ({3}/{4})"
 		"hu" "{1} szavazott {2} kitiltására. ({3}/{4})"		
-		"ru" "{1} хочет забанить {2}. ({3}/{4})"
+		"ru" "{1} голосует за бан {2}. ({3}/{4})"
 		"fr" "Le joueur {1} a voté pour le bannissement de {2}. ({3}/{4})"
 		"es" "El jugador {1} vota para banear a {2}. ({3}/{4}) votos requeridos."
 	}
@@ -14,7 +14,7 @@
 		"#format" "{1:s},{2:s},{3:d},{4:d}"
 		"en" "Player {1} voted for kick {2}. ({3}/{4})"
 		"hu" "{1} szavazott {2} kirúgására. ({3}/{4})"	
-		"ru" "{1} хочет кикнуть {2}. ({3}/{4})"
+		"ru" "{1} голосует за кик {2}. ({3}/{4})"
 		"fr" "Le joueur {1} a voté pour exclure {2}. ({3}/{4})"
 		"es" "El jugador {1} vota para kickear a {2}. ({3}/{4}) votos requeridos."
 	}
@@ -23,7 +23,7 @@
 		"#format" "{1:s},{2:s},{3:d},{4:d}"
 		"en" "Player {1} voted for mute {2}. ({3}/{4})"
 		"hu" "{1} szavazott {2} némítására. ({3}/{4})"
-		"ru" "{1} хочет замьютить {2}. ({3}/{4})"
+		"ru" "{1} голосует за мут {2}. ({3}/{4})"
 		"fr" "Le joueur {1} a voté pour le mute de {2}. ({3}/{4})"
 		"es" "El jugador {1} vota para mutear a {2}. ({3}/{4}) votos requeridos."
 	}
@@ -32,7 +32,7 @@
 		"#format" "{1:d}"
 		"en" "Please wait {1}sec before start public vote."
 		"hu" "Kérlek várj {1}másodpercet mielőtt szavazást kezdeményeznél."
-		"ru" "Пожалуйста подождите {1}сек до старта голосования."
+		"ru" "Пожалуйста подождите {1} с. перед тем как начать голосование."
 		"fr" "Veuillez patienter {1} sec avant de commencer le vote public."
 		"es" "Porfavor espera {1} segundos antes de empezar una votación."
 	}
@@ -41,7 +41,7 @@
 		"#format" "{1:d}"
 		"en" "Minimum players for voting - {1}."
 		"hu" "Szavazáshoz szükséges játékosok száma: {1}."
-		"ru" "Минимальное количество игроков для голосования - {1}."
+		"ru" "Минимальное количество игроков для начала голосования - {1}."
 		"fr" "Le minimum de joueur pour le vote doit être de  - {1}."
 		"es" "Jugadores mínimos para empezar una votación - {1}."
 	}
