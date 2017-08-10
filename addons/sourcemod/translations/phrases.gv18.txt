@@ -91,7 +91,7 @@
 	{
 		"#format" "{1:s}"
 		"en" "MUTE {1}?"
-		"en" "{1} NÉMÍTÁSA?"
+		"hu" "{1} NÉMÍTÁSA?"
 		"ru" "ЗАМЬЮТИТЬ {1}?"
 		"fr" "MUTE {1}?"
 		"es" "MUTEAR A {1}?"
