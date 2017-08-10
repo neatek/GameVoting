@@ -107,7 +107,7 @@
 	"gv_no"
 	{
 		"en" "No"
-		"en" "Nem"
+		"hu" "Nem"
 		"ru" "Нет"
 		"fr" "Non"
 		"es" "No"
