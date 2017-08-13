@@ -210,28 +210,30 @@ public void OnPluginEnd() {
 //LogToFile(LogFilePath, "Player %N(%s) was ungagged.",  client, player.steam(client));
 public void GVInitLog() {
 	
-	if(CONVAR_ENABLE_LOGS.IntValue < 1) {
-		return;
-	}
-
-	BuildPath(Path_SM, LogFilePath, sizeof(LogFilePath), "/logs/gamevoting/");
+	if(CONVAR_ENABLE_LOGS.IntValue > 0) {
 	
-	if(strlen(LogFilePath) > 0) {
+	BuildPath(Path_SM, LogFilePath, sizeof(LogFilePath), "logs/gamevoting/");
 	
-	if(DirExists(LogFilePath)) {
-		char ftime[68];
-		FormatTime(ftime, sizeof(ftime), "logs/gamevoting/gv%m-%d.txt",  GetTime());
-		BuildPath(Path_SM, LogFilePath, sizeof(LogFilePath), ftime);
-
-		#if defined PLUGIN_DEBUG_MODE
-			LogMessage("log file for GameVoting: %s", LogFilePath);
-		#endif
-	}
-	else {
-		LogError("Error! Folder /logs/gamevoting/ doesnt exists! Please, create it to enable logs.");
-		strcopy(LogFilePath,sizeof(LogFilePath), "");
+	//if(strlen(LogFilePath) > 0) {
+	
+	if(!DirExists(LogFilePath)) {
+		CreateDirectory(LogFilePath, 777);
+		//char ftime[68];
+		//FormatTime(ftime, sizeof(ftime), "logs/gamevoting/gv%m-%d.txt",  GetTime());
+		//BuildPath(Path_SM, LogFilePath, sizeof(LogFilePath), ftime);
+		//LogError("Error! Folder /logs/gamevoting/ doesnt exists! Please, create it to enable logs.");
+		//strcopy(LogFilePath,sizeof(LogFilePath), "");
 	}
 	
+	char ftime[68];
+	FormatTime(ftime, sizeof(ftime), "logs/gamevoting/gv%m-%d.txt",  GetTime());
+	BuildPath(Path_SM, LogFilePath, sizeof(LogFilePath), ftime);
+	
+	//}
+	
+		//if(StrEqual(LogFilePath,"logs/gamevoting/")) {
+		//	strcopy(LogFilePath,sizeof(LogFilePath), "");
+		//}
 	}
 }
 
