@@ -15,7 +15,8 @@
 ***/
 #pragma semicolon 1
 #pragma newdecls required
-#define VERSION "1.8.7"
+#define VERSION "1.8.8"
+#define REASON_LEN 68
 // Boring to type it again and again
 #define EVENT_PARAMS Handle event, const char[] name, bool dontBroadcast
 //#define PLUGIN_DEBUG_MODE 1
@@ -88,9 +89,11 @@ public Plugin myinfo =
 int g_startvote_delay = 0;
 ConVar ConVars[21];
 char LogFilePath[512];
+ArrayList gReasons;
 enum ENUM_VOTE_CHOISE
 {
 	current_type,
+	voteban_reason,
 	String:vbSteam[32],
 	String:vkSteam[32],
 	String:vmSteam[32],
@@ -103,6 +106,52 @@ enum ENUM_KICKED_PLAYERS
 	String:Steam[32],
 }
 int g_KickedPlayers[MAXPLAYERS+1][ENUM_KICKED_PLAYERS];
+
+public void loadReasons() {
+	if(gReasons != null) gReasons.Clear();
+	char fFile[86];
+	BuildPath(Path_SM, fFile, sizeof(fFile), "configs/gvreasons.txt");
+	if(FileExists(fFile))
+	{
+		File oFile = OpenFile(fFile,"r");
+		if(oFile == null) SetFailState("I can't open file: addons/sourcemod/configs/gvreasons.txt");
+		if(FileSize(fFile) < 5) SetFailState("Please, fill this file: addons/sourcemod/configs/gvreasons.txt");
+		char buff[REASON_LEN];
+		int oLines = 1;
+		gReasons = new ArrayList(REASON_LEN, 0);
+		while(!IsEndOfFile(oFile))
+		{
+			if(!ReadFileLine(oFile,buff,REASON_LEN)) {
+				//SetFailState("I can't read file: addons/sourcemod/configs/gvreasons.txt");
+				continue;
+			}
+				
+			TrimString(buff);
+			if(strlen(buff) > 3)
+			{
+				#if defined PLUGIN_DEBUG
+				LogMessage("Push reason: %s", buff);
+				#endif
+				gReasons.PushString(buff);
+				oLines++;
+				//gReasons.Resize(oLines);
+			}
+			else
+			{
+				LogError("Can't add reason: %s, because its smaller than 3 letters. (LINE: %d)", buff, oLines);
+			}
+		}
+		
+		oFile.Close();
+	}
+	else
+		SetFailState("Please, create file in directory: addons/sourcemod/configs/gvreasons.txt, with reasons on one line!");
+		
+	// result
+	#if defined PLUGIN_DEBUG
+	readReasons();
+	#endif
+}
 
 public void register_ConVars() {
 	// Global
@@ -150,6 +199,41 @@ public void register_ConVars() {
 	// Configs&Translations
 	AutoExecConfig(true, "Gamevoting");
 	LoadTranslations("phrases.gv18");
+}
+
+
+public int MenuHandler_Reason(Menu menu, MenuAction action, int client, int item) {
+
+	if(action == MenuAction_End) CloseHandle(menu);
+	else if(action == MenuAction_Select) 
+	{
+		char item1[11];
+		GetMenuItem(menu, client, item1, sizeof(item1));
+		g_VoteChoise[client][voteban_reason] = StringToInt(item1); // reason from array
+		ShowMenu(client, VOTE_BAN, true);
+	}
+}
+
+public void DisplayReasons(int client) {
+	Menu mReasons = CreateMenu(MenuHandler_Reason);
+	SetMenuTitle(mReasons, "[GameVoting] Reason");
+
+	int sSize = ((gReasons.Length)-1);
+	char buff[REASON_LEN];
+	char buff2[18];
+	for(int i = 0; i <= sSize; i++) {
+		gReasons.GetString(i, buff, sizeof(buff));
+		IntToString(i, buff2, sizeof(buff2));
+		AddMenuItem(mReasons, buff2, buff, ITEMDRAW_DEFAULT);
+	}
+
+	DisplayMenu(mReasons, client, 0);
+}
+
+
+
+public void OnMapStart() {
+	loadReasons();
 }
 
 public void checkcommands(int client, char[] string) {
@@ -209,7 +293,8 @@ public void OnPluginEnd() {
 
 //LogToFile(LogFilePath, "Player %N(%s) was ungagged.",  client, player.steam(client));
 public void GVInitLog() {
-	
+	loadReasons();
+
 	if(CONVAR_ENABLE_LOGS.IntValue > 0) {
 	
 	BuildPath(Path_SM, LogFilePath, sizeof(LogFilePath), "logs/gamevoting/");
@@ -450,6 +535,7 @@ public void ClearChoise(int client) {
 	strcopy(VAR_VOTEBAN, 32, "");
 	strcopy(VAR_VOTEKICK, 32, "");
 	strcopy(VAR_VOTEMUTE, 32, "");
+	g_VoteChoise[client][voteban_reason] = 0;
 	//strcopy(VAR_VOTESILENCE, 32, "");
 }
 
@@ -573,7 +659,12 @@ public void SetChoise(int type, int client, int target) {
 				DoAction(target, type, client);
 			}
 			else if(current >= CONVAR_START_VOTE_MIN.IntValue && StartVoteFlag(client)) {
-				ShowMenu(client, type, true);
+				if(type != VOTE_BAN) {
+					ShowMenu(client, type, true);
+				}
+				else {
+					DisplayReasons(client);
+				}
 			}
 		}
 	}
@@ -849,11 +940,14 @@ public void StartVote(int client, int target, int type) {
 						//FormatEx(s_Menu,sizeof(s_Menu),"GAMEVOTING - Ban %N?", target);
 						Format(s_Menu, sizeof(s_Menu), "GAMEVOTING - %T", "gv_ban_title_question", i, t_name);
 						
+						char reason[64];
+						gReasons.GetString(g_VoteChoise[client][voteban_reason], reason, sizeof(reason));
+						
 						if(strlen(s_logs) < 1) {
 						LOGS_ENABLED {
-							char auth[32],auth1[32];
+							char auth[32], auth1[32];
 							player_steam(client, auth, sizeof(auth)); player_steam(target, auth1, sizeof(auth1));
-							FormatEx(s_logs, sizeof(s_logs), "Player %N(%s) started public vote for ban %N(%s).",  client, auth,target,auth1);
+							FormatEx(s_logs, sizeof(s_logs), "Player %N(%s) started public vote for ban %N(%s). Reason = %s",  client, auth,target,auth1,reason);
 						}
 						}
 					}
@@ -1012,8 +1106,17 @@ public void DoAction(int client, int type, int last) {
 				player_steam(client, auth, sizeof(auth));
 				LogToFile(LogFilePath, "Player %N(%s) was banned by voting. (Last voted player: %N)",  client, auth,last);
 			}
+			
+			int reason_num = HasReason(client);
+			char reason[64];
+			if(reason_num > -1) {
+				gReasons.GetString(reason_num, reason, sizeof(reason));
+			}
+			else {
+				strcopy(reason, sizeof(reason), "Empty reason");
+			}
 
-			ServerCommand("sm_ban #%d %d \"Banned by Gamevoting (%N)\"", GetClientUserId(client), CONVAR_BAN_DURATION.IntValue, last);
+			ServerCommand("sm_ban #%d %d \"Gamevoting (%N)(%s)\"", GetClientUserId(client), CONVAR_BAN_DURATION.IntValue, last, reason);
 		}
 		case VOTE_KICK: {
 			ClearChoise(client); // clear votes of players if kick or ban
@@ -1048,4 +1151,19 @@ public void DoAction(int client, int type, int last) {
 		}*/
 	}
 	
+}
+
+public int HasReason(int target) {
+	char auth[32];
+	player_steam(target, auth, sizeof(auth));
+	for(int i =0 ; i <= MAXPLAYERS; i ++) {
+		if(StrEqual(VAR_IVOTEBAN,auth,true)) {
+			//strcopy(VAR_IVOTEBAN, 32, "");
+			if(g_VoteChoise[i][voteban_reason] > 0) {
+				return g_VoteChoise[i][voteban_reason];
+			}
+		}
+	}
+		
+	return -1;
 }
