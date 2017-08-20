@@ -19,5 +19,5 @@ https://www.paypal.me/neatek
 - RELEASED 04.08.2017 - start voting by command for all users using menus. (voteban - yes/no)
 - RELEASED 07.08.2017 - translations.
 - RELEASED 07.08.2017 - improvements.
-- RELEASED 07.08.2017 -bug fixes.
-- chat colors.
+- RELEASED 07.08.2017 - bug fixes.
+- RELEASED 20.08.2017 - voteban reasons for "StartVote" feature/
