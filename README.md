@@ -1,6 +1,8 @@
 # GameVoting 1.8.8
 Very simple (light) voting plugin Sourcemod.net for TF2, CSS, CSGO etc
 
+[![HitCount](http://hits.dwyl.io/neatek/GameVoting.svg)](http://hits.dwyl.io/neatek/GameVoting)
+
 # How to Install
 just replace addons folder!
 
