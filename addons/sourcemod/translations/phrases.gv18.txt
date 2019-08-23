@@ -4,6 +4,7 @@
 	{
 		"#format" "{1:s},{2:s},{3:d},{4:d}"
 		"en" "Player {1} voted for ban {2}. ({3}/{4})"
+		"pt" "Player {1} voted for ban {2}. ({3}/{4})"
 		"hu" "{1} szavazott {2} kitiltására. ({3}/{4})"		
 		"ru" "{1} голосует за бан {2}. ({3}/{4})"
 		"fr" "Le joueur {1} a voté pour le bannissement de {2}. ({3}/{4})"
@@ -13,6 +14,7 @@
 	{
 		"#format" "{1:s},{2:s},{3:d},{4:d}"
 		"en" "Player {1} voted for kick {2}. ({3}/{4})"
+		"pt" "Player {1} voted for kick {2}. ({3}/{4})"
 		"hu" "{1} szavazott {2} kirúgására. ({3}/{4})"	
 		"ru" "{1} голосует за кик {2}. ({3}/{4})"
 		"fr" "Le joueur {1} a voté pour exclure {2}. ({3}/{4})"
@@ -22,6 +24,7 @@
 	{
 		"#format" "{1:s},{2:s},{3:d},{4:d}"
 		"en" "Player {1} voted for mute {2}. ({3}/{4})"
+		"pt" "Player {1} voted for mute {2}. ({3}/{4})"
 		"hu" "{1} szavazott {2} némítására. ({3}/{4})"
 		"ru" "{1} голосует за мут {2}. ({3}/{4})"
 		"fr" "Le joueur {1} a voté pour le mute de {2}. ({3}/{4})"
@@ -31,6 +34,7 @@
 	{
 		"#format" "{1:d}"
 		"en" "Please wait {1}sec before start public vote."
+		"pt" "Please wait {1}sec before start public vote."
 		"hu" "Kérlek várj {1}másodpercet mielőtt szavazást kezdeményeznél."
 		"ru" "Пожалуйста подождите {1} с. перед тем как начать голосование."
 		"fr" "Veuillez patienter {1} sec avant de commencer le vote public."
@@ -40,6 +44,7 @@
 	{
 		"#format" "{1:d}"
 		"en" "Minimum players for voting - {1}."
+		"pt" "Minimum players for voting - {1}."
 		"hu" "Szavazáshoz szükséges játékosok száma: {1}."
 		"ru" "Минимальное количество игроков для начала голосования - {1}."
 		"fr" "Le minimum de joueur pour le vote doit être de  - {1}."
@@ -48,6 +53,7 @@
 	"gv_ban_title"
 	{
 		"en" "BAN"
+		"pt" "BAN"
 		"hu" "KITILTÁS"		
 		"ru" "БАН"
 		"fr" "BANNIR"
@@ -56,6 +62,7 @@
 	"gv_kick_title"
 	{
 		"en" "KICK"
+		"pt" "KICK"
 		"hu" "KIRÚGÁS"
 		"ru" "КИК"
 		"fr" "EXCLURE"
@@ -64,6 +71,7 @@
 	"gv_mute_title"
 	{
 		"en" "MUTE"
+		"pt" "MUTE"
 		"hu" "NÉMÍTÁS"
 		"ru" "МУТ"
 		"fr" "MUTE"
@@ -73,6 +81,7 @@
 	{
 		"#format" "{1:s}"
 		"en" "BAN {1}?"
+		"pt" "BAN {1}?"
 		"hu" "{1} KITILTÁSA?"	
 		"ru" "ЗАБАНИТЬ {1}?"
 		"fr" "BANNIR {1}?"
@@ -82,6 +91,7 @@
 	{
 		"#format" "{1:s}"
 		"en" "KICK {1}?"
+		"pt" "KICK {1}?"
 		"hu" "{1} KIRÚGÁSA?"
 		"ru" "КИКНУТЬ {1}?"
 		"fr" "EXCLURE {1}?"
@@ -91,6 +101,7 @@
 	{
 		"#format" "{1:s}"
 		"en" "MUTE {1}?"
+		"pt" "MUTE {1}?"
 		"hu" "{1} NÉMÍTÁSA?"
 		"ru" "ЗАМЬЮТИТЬ {1}?"
 		"fr" "MUTE {1}?"
@@ -99,6 +110,7 @@
 	"gv_yes"
 	{
 		"en" "Yes"
+		"pt" "Sim"
 		"hu" "Igen"
 		"ru" "Да"
 		"fr" "Oui"
@@ -107,6 +119,7 @@
 	"gv_no"
 	{
 		"en" "No"
+		"pt" "Não"
 		"hu" "Nem"
 		"ru" "Нет"
 		"fr" "Non"
