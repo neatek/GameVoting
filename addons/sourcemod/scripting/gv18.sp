@@ -15,7 +15,7 @@
 ***/
 #pragma semicolon 1
 #pragma newdecls required
-#define VERSION "1.8.8"
+#define VERSION "1.8.9"
 #define REASON_LEN 68
 // Boring to type it again and again
 #define EVENT_PARAMS Handle event, const char[] name, bool dontBroadcast
@@ -37,21 +37,22 @@ public Plugin myinfo =
 #define VOTE_KICK 2
 #define VOTE_MUTE 3
 #define VOTE_SILENCE 4
-#define VAR_VOTEBAN g_VoteChoise[client][vbSteam]
-#define VAR_VOTEKICK g_VoteChoise[client][vkSteam]
-#define VAR_VOTEMUTE g_VoteChoise[client][vmSteam]
-#define VAR_VOTESILENCE g_VoteChoise[client][vsSteam]
+#define VAR_VOTEBAN g_VoteChoise[client].vbSteam
+#define VAR_VOTEKICK g_VoteChoise[client].vkSteam
+#define VAR_VOTEMUTE g_VoteChoise[client].vmSteam
+#define VAR_VOTESILENCE g_VoteChoise[client].vsSteam
 
-#define VAR_IVOTEBAN g_VoteChoise[i][vbSteam]
-#define VAR_IVOTEKICK g_VoteChoise[i][vkSteam]
-#define VAR_IVOTEMUTE g_VoteChoise[i][vmSteam]
-#define VAR_IVOTESILENCE g_VoteChoise[i][vsSteam]
+#define VAR_IVOTEBAN g_VoteChoise[i].vbSteam
+#define VAR_IVOTEKICK g_VoteChoise[i].vkSteam
+#define VAR_IVOTEMUTE g_VoteChoise[i].vmSteam
+#define VAR_IVOTESILENCE g_VoteChoise[i].vsSteam
 
-#define VAR_TVOTEBAN g_VoteChoise[target][vbSteam]
-#define VAR_TVOTEKICK g_VoteChoise[target][vkSteam]
-#define VAR_TVOTEMUTE g_VoteChoise[target][vmSteam]
-#define VAR_TVOTESILENCE g_VoteChoise[target][vsSteam]
-#define VAR_CTYPE g_VoteChoise[client][current_type]
+#define VAR_TVOTEBAN g_VoteChoise[target].vbSteam
+#define VAR_TVOTEKICK g_VoteChoise[target].vkSteam
+#define VAR_TVOTEMUTE g_VoteChoise[target].vmSteam
+#define VAR_TVOTESILENCE g_VoteChoise[target].vsSteam
+#define VAR_CTYPE g_VoteChoise[client].current_type
+
 #define PLUG_TAG "GameVoting"
 #define BAN_COMMAND  "voteban"
 #define KICK_COMMAND "votekick"
@@ -86,26 +87,32 @@ public Plugin myinfo =
 
 #define LOGS_ENABLED if(strlen(LogFilePath) > 0 && CONVAR_ENABLE_LOGS.IntValue > 0)
 
+enum struct ENUM_VOTE_CHOISE
+{
+	int current_type;
+	int voteban_reason;
+	char vbSteam[32];
+	char vkSteam[32];
+	char vmSteam[32];
+	char vsSteam[32];
+}
+enum struct ENUM_KICKED_PLAYERS
+{
+	int time;
+	char Steam[32];
+}
+
 int g_startvote_delay = 0;
 ConVar ConVars[21];
 char LogFilePath[512];
 ArrayList gReasons;
-enum ENUM_VOTE_CHOISE
-{
-	current_type,
-	voteban_reason,
-	String:vbSteam[32],
-	String:vkSteam[32],
-	String:vmSteam[32],
-	String:vsSteam[32]
-}
-int g_VoteChoise[MAXPLAYERS+1][ENUM_VOTE_CHOISE];
-enum ENUM_KICKED_PLAYERS
-{
-	time,
-	String:Steam[32],
-}
-int g_KickedPlayers[MAXPLAYERS+1][ENUM_KICKED_PLAYERS];
+// new ENUM, oh thanks, really
+//ArrayList g_VoteChoise;
+//ArrayList g_KickedPlayers;
+ENUM_VOTE_CHOISE g_VoteChoise[MAXPLAYERS+1];
+//[ENUM_VOTE_CHOISE]
+ENUM_KICKED_PLAYERS g_KickedPlayers[MAXPLAYERS+1];
+//[ENUM_KICKED_PLAYERS]
 
 public void loadReasons() {
 	if(gReasons != null) gReasons.Clear();
@@ -209,7 +216,10 @@ public int MenuHandler_Reason(Menu menu, MenuAction action, int client, int item
 	{
 		char item1[11];
 		GetMenuItem(menu, client, item1, sizeof(item1));
-		g_VoteChoise[client][voteban_reason] = StringToInt(item1); // reason from array
+		g_VoteChoise[client].voteban_reason = StringToInt(item1); // reason from array
+		//const ENUM_VOTE_CHOISE class = g_VoteChoise[client];
+		//g_VoteChoise[client] 
+		//g_VoteChoise[client] = StringToInt(item1); // reason from array
 		ShowMenu(client, VOTE_BAN, true);
 	}
 }
@@ -326,14 +336,14 @@ public int FindFreeSlot() {
 
 	for(int i =0 ; i <= MAXPLAYERS; i ++) {
 	
-		if(g_KickedPlayers[i][time] == 0) {
+		if(g_KickedPlayers[i].time == 0) {
 		
 			return i;
 			
 		
-		} else if(g_KickedPlayers[i][time] < GetTime()) {
+		} else if(g_KickedPlayers[i].time < GetTime()) {
 		
-			g_KickedPlayers[i][time] = 0;
+			g_KickedPlayers[i].time = 0;
 		
 		}
 		
@@ -354,7 +364,7 @@ public bool isadmin(int client)
 public bool adminsonserver()
 {
 	bool result = false;
-	for(int i=0; i < GetMaxClients(); ++i) {
+	for(int i=0; i < MaxClients; ++i) {
 		if(IsCorrectPlayer(i)) {
 			if(isadmin(i)) {
 				result = true;
@@ -416,7 +426,7 @@ public void PushKickedPlayer(int client) {
 		#endif
 		if(slot > -1) {
 		
-			g_KickedPlayers[client][time] = GetTime() + ( CONVAR_KICK_DURATION.IntValue );
+			g_KickedPlayers[client].time = GetTime() + ( CONVAR_KICK_DURATION.IntValue );
 			
 			#if defined PLUGIN_DEBUG_MODE
 				LogMessage("Kicked time : %d", (GetTime() + ( CONVAR_KICK_DURATION.IntValue )));
@@ -426,7 +436,7 @@ public void PushKickedPlayer(int client) {
 			//GetClientAuthId(client, AuthId_Engine, auth, sizeof(auth));
 			player_steam(client, auth, sizeof(auth));
 			
-			strcopy(g_KickedPlayers[client][Steam], 32, auth);
+			strcopy(g_KickedPlayers[client].Steam, 32, auth);
 			
 		}
 		
@@ -443,14 +453,14 @@ public int KickedPlayer(int client) {
 		player_steam(client, auth, sizeof(auth));
 		
 		for(int i =0 ; i <= MAXPLAYERS; i ++) {
-			if(StrEqual(g_KickedPlayers[i][Steam],auth,true)) {
+			if(StrEqual(g_KickedPlayers[i].Steam,auth,true)) {
 			
-				if(g_KickedPlayers[i][time] > GetTime()) {
-					return ( g_KickedPlayers[i][time] - GetTime() );
+				if(g_KickedPlayers[i].time > GetTime()) {
+					return ( g_KickedPlayers[i].time - GetTime() );
 				}
 				else {
-					strcopy(g_KickedPlayers[i][Steam], 32, "");
-					g_KickedPlayers[i][time] = 0;
+					strcopy(g_KickedPlayers[i].Steam, 32, "");
+					g_KickedPlayers[i].time = 0;
 					return 0;
 				
 				}
@@ -535,7 +545,7 @@ public void ClearChoise(int client) {
 	strcopy(VAR_VOTEBAN, 32, "");
 	strcopy(VAR_VOTEKICK, 32, "");
 	strcopy(VAR_VOTEMUTE, 32, "");
-	g_VoteChoise[client][voteban_reason] = 0;
+	g_VoteChoise[client].voteban_reason = 0;
 	//strcopy(VAR_VOTESILENCE, 32, "");
 }
 
@@ -577,7 +587,7 @@ public int GetCountNeeded(int type) {
 	
 	}
 	
-	return -1;
+	//return -1;
 }
 
 public void SetChoise(int type, int client, int target) {
@@ -897,7 +907,7 @@ public void ShowMenu(int client, int type, bool startvote_force) {
 		//mymenu.AddItem("-1", "\nSELECT TARGET PLAYER", ITEMDRAW_RAWLINE|ITEMDRAW_DISABLED);
 
 		char Name[48], id[11];
-		for(int target=0;target<GetMaxClients();target++) {
+		for(int target=0;target<MaxClients;target++) {
 			VALID_TARGET {
 			
 				if(target != client && !HasImmunity(target)) {
@@ -941,7 +951,7 @@ public void StartVote(int client, int target, int type) {
 						Format(s_Menu, sizeof(s_Menu), "GAMEVOTING - %T", "gv_ban_title_question", i, t_name);
 						
 						char reason[64];
-						gReasons.GetString(g_VoteChoise[client][voteban_reason], reason, sizeof(reason));
+						gReasons.GetString(g_VoteChoise[client].voteban_reason, reason, sizeof(reason));
 						
 						if(strlen(s_logs) < 1) {
 						LOGS_ENABLED {
@@ -1024,21 +1034,15 @@ public int menu_startvote_action_handler(Menu menu, MenuAction action, int clien
 	if (action == MenuAction_Select) {
 		char info[48];
 		GetMenuItem(menu, item, info, sizeof(info));
-		
 		if(strlen(info) > 0) 
 		{
-		
-		char ex[3][11];
-		ExplodeString(info, "|", ex, 3, 11);
-
-		//int initiator = StringToInt(ex[0]);
-		int target = StringToInt(ex[1]);
-		int type = StringToInt(ex[2]);
-
-		VALID_TARGET {
-			SetChoise(type, client, target);
-		}
-		
+			char ex[3][11];
+			ExplodeString(info, "|", ex, 3, 11);
+			int target = StringToInt(ex[1]);
+			int type = StringToInt(ex[2]);
+			VALID_TARGET {
+				SetChoise(type, client, target);
+			}
 		}
 	}
 	else if (action == MenuAction_End) {
@@ -1090,10 +1094,8 @@ public void player_steam(int client, char[] steam_id, int size) {
 				
 		}
 	}
-	//return auth;
 }
 
-// do action 
 public void DoAction(int client, int type, int last) {
 	
 	switch(type) {
@@ -1136,7 +1138,7 @@ public void DoAction(int client, int type, int last) {
 			[SourceComms++] Usage: sm_mute <#userid|name> [reason]
 			*/
 			ClearVotesForClient(client, VOTE_MUTE);
-			
+
 			LOGS_ENABLED {
 				char auth[32];
 				player_steam(client, auth, sizeof(auth));
@@ -1144,11 +1146,8 @@ public void DoAction(int client, int type, int last) {
 			}
 
 			ServerCommand("sm_silence #%d %d \"Muted by Gamevoting (%N)\"", GetClientUserId(client), CONVAR_MUTE_DURATION.IntValue, last);
-			
+
 		}
-		/*case VOTE_SILENCE: {
-			ServerCommand("sm_silence #%d %d \"Silenced by Gamevoting (%N)\"", GetClientUserId(client), CONVAR_SILENCE_DURATION.IntValue, client);
-		}*/
 	}
 	
 }
@@ -1159,8 +1158,8 @@ public int HasReason(int target) {
 	for(int i =0 ; i <= MAXPLAYERS; i ++) {
 		if(StrEqual(VAR_IVOTEBAN,auth,true)) {
 			//strcopy(VAR_IVOTEBAN, 32, "");
-			if(g_VoteChoise[i][voteban_reason] > 0) {
-				return g_VoteChoise[i][voteban_reason];
+			if(g_VoteChoise[i].voteban_reason > 0) {
+				return g_VoteChoise[i].voteban_reason;
 			}
 		}
 	}
