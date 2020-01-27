@@ -1,5 +1,5 @@
-# GameVoting 1.8.8
-Very simple (light) voting plugin Sourcemod.net for TF2, CSS, CSGO etc
+# GameVoting 1.8.9
+Light voting plugin Sourcemod.net for TF2, CSS, CSGO etc
 
 [![HitCount](http://hits.dwyl.io/neatek/GameVoting.svg)](http://hits.dwyl.io/neatek/GameVoting)
 
@@ -17,9 +17,10 @@ https://www.paypal.me/neatek
 
 * Для русских пользователей вы можете использовать ссылку https://neatek.ru/gvsupport/
 
-# Will be released:
+# Changes:
 - RELEASED 04.08.2017 - start voting by command for all users using menus. (voteban - yes/no)
 - RELEASED 07.08.2017 - translations.
 - RELEASED 07.08.2017 - improvements.
 - RELEASED 07.08.2017 - bug fixes.
 - RELEASED 20.08.2017 - voteban reasons for "StartVote" feature/
+- RELEASED 27.01.2020 - new Enum struct syntax
