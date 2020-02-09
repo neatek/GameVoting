@@ -1,29 +1,23 @@
 //#include <sourcemod>
-
 /***
-
 	Programming is philosophy.
 	Silence is golden.
-
 	# GAMEVOTING #
 		Vladimir Zhelnov @neatek
-		Sourcemod 1.8 // 2017
-
+		Sourcemod 1.8 -gv188 // 2017
+		Sourcemod 1.10 - gv190 // 2020
 	Contact me:
 	https://discord.gg/J7eSXuU
-	
+	https://neatek.ru/en
 ***/
 #pragma semicolon 1
 #pragma newdecls required
-#define VERSION "1.8.9"
+#define VERSION "1.9.0"
 #define REASON_LEN 68
-// Boring to type it again and again
 #define EVENT_PARAMS Handle event, const char[] name, bool dontBroadcast
-//#define PLUGIN_DEBUG_MODE 1
 #define VALID_PLAYER if(IsCorrectPlayer(client))
 #define VALID_TARGET if(IsCorrectPlayer(target))
 #define EVENT_GET_PLAYER GetClientOfUserId(GetEventInt(event, "userid"));
-
 public Plugin myinfo =
 {
 	name = "GameVoting",
@@ -32,7 +26,6 @@ public Plugin myinfo =
 	version = VERSION,
 	url = "https://github.com/neatek/GameVoting"
 };
-
 #define VOTE_BAN 1
 #define VOTE_KICK 2
 #define VOTE_MUTE 3
@@ -41,18 +34,15 @@ public Plugin myinfo =
 #define VAR_VOTEKICK g_VoteChoise[client].vkSteam
 #define VAR_VOTEMUTE g_VoteChoise[client].vmSteam
 #define VAR_VOTESILENCE g_VoteChoise[client].vsSteam
-
 #define VAR_IVOTEBAN g_VoteChoise[i].vbSteam
 #define VAR_IVOTEKICK g_VoteChoise[i].vkSteam
 #define VAR_IVOTEMUTE g_VoteChoise[i].vmSteam
 #define VAR_IVOTESILENCE g_VoteChoise[i].vsSteam
-
 #define VAR_TVOTEBAN g_VoteChoise[target].vbSteam
 #define VAR_TVOTEKICK g_VoteChoise[target].vkSteam
 #define VAR_TVOTEMUTE g_VoteChoise[target].vmSteam
 #define VAR_TVOTESILENCE g_VoteChoise[target].vsSteam
 #define VAR_CTYPE g_VoteChoise[client].current_type
-
 #define PLUG_TAG "GameVoting"
 #define BAN_COMMAND  "voteban"
 #define KICK_COMMAND "votekick"
@@ -77,16 +67,15 @@ public Plugin myinfo =
 //#define CONVAR_SILENCE_PERCENT ConVars[15]
 #define CONVAR_IMMUNITY_FLAG ConVars[16]
 #define CONVAR_IMMUNITY_zFLAG ConVars[17]
-
 #define CONVAR_FLAG_START_VOTE ConVars[4]
 #define CONVAR_START_VOTE_DELAY ConVars[9]
 #define CONVAR_START_VOTE_ENABLE ConVars[15]
 #define CONVAR_AUTHID_TYPE ConVars[18]
 #define CONVAR_ENABLE_LOGS ConVars[19]
 #define CONVAR_START_VOTE_MIN ConVars[20]
-
 #define LOGS_ENABLED if(strlen(LogFilePath) > 0 && CONVAR_ENABLE_LOGS.IntValue > 0)
-
+//#define PLUGIN_DEBUG 1
+//#define PLUGIN_DEBUG_MODE 1
 enum struct ENUM_VOTE_CHOISE
 {
 	int current_type;
@@ -101,18 +90,12 @@ enum struct ENUM_KICKED_PLAYERS
 	int time;
 	char Steam[32];
 }
-
 int g_startvote_delay = 0;
 ConVar ConVars[21];
 char LogFilePath[512];
 ArrayList gReasons;
-// new ENUM, oh thanks, really
-//ArrayList g_VoteChoise;
-//ArrayList g_KickedPlayers;
 ENUM_VOTE_CHOISE g_VoteChoise[MAXPLAYERS+1];
-//[ENUM_VOTE_CHOISE]
 ENUM_KICKED_PLAYERS g_KickedPlayers[MAXPLAYERS+1];
-//[ENUM_KICKED_PLAYERS]
 
 public void loadReasons() {
 	if(gReasons != null) gReasons.Clear();
@@ -132,7 +115,6 @@ public void loadReasons() {
 				//SetFailState("I can't read file: addons/sourcemod/configs/gvreasons.txt");
 				continue;
 			}
-				
 			TrimString(buff);
 			if(strlen(buff) > 3)
 			{
@@ -141,7 +123,6 @@ public void loadReasons() {
 				#endif
 				gReasons.PushString(buff);
 				oLines++;
-				//gReasons.Resize(oLines);
 			}
 			else
 			{
@@ -153,11 +134,6 @@ public void loadReasons() {
 	}
 	else
 		SetFailState("Please, create file in directory: addons/sourcemod/configs/gvreasons.txt, with reasons on one line!");
-		
-	// result
-	#if defined PLUGIN_DEBUG
-	readReasons();
-	#endif
 }
 
 public void register_ConVars() {
@@ -166,51 +142,42 @@ public void register_ConVars() {
 	CONVAR_ENABLED = CreateConVar("gamevoting_enable", "1", "Enable or disable plugin (def:1)", _, true, 0.0, true, 1.0);	
 	CONVAR_AUTHID_TYPE = CreateConVar("gamevoting_authid", "1", "AuthID type, 1 - AuthId_Engine, 2 - AuthId_Steam2, 3 - AuthId_Steam3, 4 - AuthId_SteamID64 (def:1)", _, true, 1.0, true, 4.0);
 	CONVAR_ENABLE_LOGS = CreateConVar("gamevoting_logs",	 "1", "Enable or disable logs for plugin (def:1)", _, true, 0.0, true, 1.0);
-
 	// Min players
 	CONVAR_MIN_PLAYERS = CreateConVar("gamevoting_players",	"8", "Minimum players need to enable votes (def:8)", _, true, 0.0, true, 20.0);
 	CONVAR_AUTODISABLE = CreateConVar("gamevoting_autodisable","0", "Disable plugin when admins on server? (def:0)", _, true, 0.0, true, 1.0);
-
 	// Disables
 	CONVAR_BAN_ENABLE = CreateConVar("gamevoting_voteban",	"1", "Enable or disable voteban functional (def:1)", _, true, 0.0, true, 1.0);
 	CONVAR_KICK_ENABLE = CreateConVar("gamevoting_votekick",	"1", "Enable or disable votekick (def:1)", _, true, 0.0, true, 1.0);
 	CONVAR_MUTE_ENABLE = CreateConVar("gamevoting_votemute",	"1", "Enable or disable votemute (def:1)", _, true, 0.0, true, 1.0);
 	//CONVAR_SILENCE_ENABLE = CreateConVar("gamevoting_votesilence",	"1",	"Enable or disable silence (def:1)", _, true, 0.0, true, 1.0);
-
 	// Durations
 	CONVAR_BAN_DURATION = CreateConVar("gamevoting_voteban_delay", "20", "Ban duration in minutes (def:120)", _, true, 0.0, false);
 	CONVAR_KICK_DURATION = CreateConVar("gamevoting_votekick_delay", "20", "Kick duration in seconds (def:20)", _, true, 0.0, false);
 	CONVAR_MUTE_DURATION = CreateConVar("gamevoting_votemute_delay", "20", "Mute duration in minutes (def:120)", _, true, 0.0, false);
 	//CONVAR_SILENCE_DURATION = CreateConVar("gamevoting_votesilence_delay", "1", "Mute duration in minutes (def:120)", _, true, 0.0, false);
-
 	// Percent
 	CONVAR_BAN_PERCENT = CreateConVar("gamevoting_voteban_percent",	"80", "Needed percent of players for ban someone (def:80)", _, true, 0.0, true, 100.0);
 	CONVAR_KICK_PERCENT = CreateConVar("gamevoting_votekick_percent", "80", "Needed percent of players for kick someone (def:80)", _, true, 0.0, true, 100.0);
 	CONVAR_MUTE_PERCENT = CreateConVar("gamevoting_votemute_percent", "75", "Needed percent of players for mute someone (def:75)", _, true, 0.0, true, 100.0);
 	//CONVAR_SILENCE_PERCENT = CreateConVar("gamevoting_votesilence_percent",	 "75",	"Needed percent of players for silence someone (def:75)", _, true, 0.0, true, 100.0);
-
 	// ImmunityFlags
 	CONVAR_IMMUNITY_FLAG = CreateConVar("gamevoting_immunity_flag",	"a", "Immunity flag from all votes, set empty for disable immunity (def:a)");
 	CONVAR_IMMUNITY_zFLAG = CreateConVar("gamevoting_immunity_zflag", "1", "Immunity for admin flag \"z\"");
-
 	// StartVote
 	CONVAR_START_VOTE_ENABLE = CreateConVar("gamevoting_startvote_enable", "1", "Disable of enable public votes (def:1)", _, true, 0.0, true, 1.0);
 	CONVAR_FLAG_START_VOTE = CreateConVar("gamevoting_startvote_flag", "", "Who can start voting for ban or something, set empty for all players (def:a)");
 	CONVAR_START_VOTE_DELAY = CreateConVar("gamevoting_startvote_delay", "20", "Delay between public votes in seconds (def:20)", _, true, 0.0, false);
 	CONVAR_START_VOTE_MIN = CreateConVar("gamevoting_startvote_min", "4", "Minimum players for start \"startvote\" feature (def:4)", _, true, 0.0);
-
 	// Listeners
 	AddCommandListener(OnClientCommands, "say");
 	AddCommandListener(OnClientCommands, "say_team");
-
 	// Configs&Translations
 	AutoExecConfig(true, "Gamevoting");
-	LoadTranslations("phrases.gv18");
+	LoadTranslations("phrases.gv");
 }
 
 
 public int MenuHandler_Reason(Menu menu, MenuAction action, int client, int item) {
-
 	if(action == MenuAction_End) CloseHandle(menu);
 	else if(action == MenuAction_Select) 
 	{
@@ -240,15 +207,12 @@ public void DisplayReasons(int client) {
 	DisplayMenu(mReasons, client, 0);
 }
 
-
-
 public void OnMapStart() {
 	loadReasons();
 }
 
 public void checkcommands(int client, char[] string) {
 	VALID_PLAYER {
-
 		#if defined PLUGIN_DEBUG_MODE
 			PrintToChatAll("checkcommands : %s", string);
 		#endif
@@ -304,13 +268,9 @@ public void OnPluginEnd() {
 //LogToFile(LogFilePath, "Player %N(%s) was ungagged.",  client, player.steam(client));
 public void GVInitLog() {
 	loadReasons();
-
 	if(CONVAR_ENABLE_LOGS.IntValue > 0) {
-	
 	BuildPath(Path_SM, LogFilePath, sizeof(LogFilePath), "logs/gamevoting/");
-	
 	//if(strlen(LogFilePath) > 0) {
-	
 	if(!DirExists(LogFilePath)) {
 		CreateDirectory(LogFilePath, 777);
 		//char ftime[68];
@@ -319,11 +279,9 @@ public void GVInitLog() {
 		//LogError("Error! Folder /logs/gamevoting/ doesnt exists! Please, create it to enable logs.");
 		//strcopy(LogFilePath,sizeof(LogFilePath), "");
 	}
-	
 	char ftime[68];
 	FormatTime(ftime, sizeof(ftime), "logs/gamevoting/gv%m-%d.txt",  GetTime());
 	BuildPath(Path_SM, LogFilePath, sizeof(LogFilePath), ftime);
-	
 	//}
 	
 		//if(StrEqual(LogFilePath,"logs/gamevoting/")) {
@@ -333,24 +291,14 @@ public void GVInitLog() {
 }
 
 public int FindFreeSlot() {
-
 	for(int i =0 ; i <= MAXPLAYERS; i ++) {
-	
 		if(g_KickedPlayers[i].time == 0) {
-		
 			return i;
-			
-		
 		} else if(g_KickedPlayers[i].time < GetTime()) {
-		
 			g_KickedPlayers[i].time = 0;
-		
 		}
-		
 	}
-	
 	return -1;
-	
 }
 
 public bool isadmin(int client)
@@ -372,18 +320,15 @@ public bool adminsonserver()
 			}
 		}
 	}
-		
 	return result;
 }
 
 
 public void ClearVotesForClient(int client, int type) {
 	VALID_PLAYER {
-		
 		char auth[32];
 		//GetClientAuthId(client, AuthId_Engine, auth, sizeof(auth));
 		player_steam(client, auth, sizeof(auth));
-		
 		for(int i =0 ; i <= MAXPLAYERS; i ++) {
 			
 			switch(type) {
@@ -410,7 +355,6 @@ public void ClearVotesForClient(int client, int type) {
 				}
 				
 			}
-
 			/*if(StrEqual(VAR_IVOTESILENCE,auth,true)) {
 				strcopy(VAR_IVOTESILENCE, 32, "");
 			}*/
@@ -425,23 +369,16 @@ public void PushKickedPlayer(int client) {
 			LogMessage("Kicked free slot : %d", slot);
 		#endif
 		if(slot > -1) {
-		
 			g_KickedPlayers[client].time = GetTime() + ( CONVAR_KICK_DURATION.IntValue );
-			
 			#if defined PLUGIN_DEBUG_MODE
 				LogMessage("Kicked time : %d", (GetTime() + ( CONVAR_KICK_DURATION.IntValue )));
 			#endif
-			
 			char auth[32];
 			//GetClientAuthId(client, AuthId_Engine, auth, sizeof(auth));
 			player_steam(client, auth, sizeof(auth));
-			
 			strcopy(g_KickedPlayers[client].Steam, 32, auth);
-			
 		}
-		
 		KickClient(client, "Kicked by GameVoting (wait: %dsec)", CONVAR_KICK_DURATION.IntValue);
-		
 	}
 	
 }
@@ -615,7 +552,7 @@ public void SetChoise(int type, int client, int target) {
 					char c_name[32],t_name[32];
 					GetClientName(client, c_name, sizeof(c_name));
 					GetClientName(target, t_name, sizeof(t_name));
-					PrintToChatAll("[GameVoting] %t", "gv_voted_for_ban", c_name, t_name, current, needed);
+					PrintToChatAll("\x04[GameVoting]\x01 %t", "gv_voted_for_ban", c_name, t_name, current, needed);
 					
 					LOGS_ENABLED {
 						char auth1[32];//,auth2[32];
@@ -632,7 +569,7 @@ public void SetChoise(int type, int client, int target) {
 					GetClientName(client, c_name, sizeof(c_name));
 					GetClientName(target, t_name, sizeof(t_name));
 					//PrintToChatAll("Player %N voted for kick %N. (%d/%d)", client, target, current, needed);
-					PrintToChatAll("[GameVoting] %t", "gv_voted_for_kick", c_name, t_name, current, needed);
+					PrintToChatAll("\x04[GameVoting]\x01 %t", "gv_voted_for_kick", c_name, t_name, current, needed);
 					
 					LOGS_ENABLED {
 						char auth1[32];//,auth2[32];
@@ -649,7 +586,7 @@ public void SetChoise(int type, int client, int target) {
 					GetClientName(client, c_name, sizeof(c_name));
 					GetClientName(target, t_name, sizeof(t_name));
 					//PrintToChatAll("Player %N voted for mute %N. (%d/%d)", client, target, current, needed);
-					PrintToChatAll("[GameVoting] %t", "gv_voted_for_mute", c_name, t_name, current, needed);
+					PrintToChatAll("\x04[GameVoting]\x01 %t", "gv_voted_for_mute", c_name, t_name, current, needed);
 					
 					LOGS_ENABLED {
 						char auth1[32];//,auth2[32];
@@ -753,7 +690,7 @@ public void CheckCommand(int client, const char[] args, const char[] pref) {
 
 	if(CountPlayers_withoutImmunity() < CONVAR_MIN_PLAYERS.IntValue) {
 		//PrintToChat(client, "[GameVoting] Minimum players for voting - %d.", CONVAR_MIN_PLAYERS.IntValue);
-		PrintToChat(client, "[GameVoting] %t", "gv_min_players", CONVAR_MIN_PLAYERS.IntValue);
+		PrintToChat(client, "\x04[GameVoting]\x01 %t", "gv_min_players", CONVAR_MIN_PLAYERS.IntValue);
 		return;
 	}
 	
@@ -768,7 +705,8 @@ public void CheckCommand(int client, const char[] args, const char[] pref) {
 			return;
 		}
 	
-		ShowMenu(client,VOTE_BAN,false);
+		DisplayReasons(client);
+		//ShowMenu(client,VOTE_BAN,false);
 		return;
 	}
 	
@@ -811,7 +749,7 @@ public bool StartVoteFlag(int client) {
 
 	if(g_startvote_delay > GetTime() && CONVAR_START_VOTE_ENABLE.IntValue > 0 ) {
 		//PrintToChat(client, "[GameVoting] Please wait %dsec before start public vote.", ((g_startvote_delay)-GetTime()) );
-		PrintToChat(client, "[GameVoting] %t", "gv_wait_before_startvote", ((g_startvote_delay)-GetTime()));
+		PrintToChat(client, "\x04[GameVoting]\x01 %t", "gv_wait_before_startvote", ((g_startvote_delay)-GetTime()));
 		return false;
 	}
 
@@ -926,7 +864,7 @@ public void StartVote(int client, int target, int type) {
 
 	VALID_PLAYER { VALID_TARGET {
 		if(g_startvote_delay > GetTime()) {
-			PrintToChat(client, "[GameVoting] %t", "gv_wait_before_startvote", ((g_startvote_delay)-GetTime()));
+			PrintToChat(client, "\x04[GameVoting]\x01 %t", "gv_wait_before_startvote", ((g_startvote_delay)-GetTime()));
 			return;
 		}
 
@@ -935,7 +873,24 @@ public void StartVote(int client, int target, int type) {
 		char s_logs[128];
 		char t_name[32];
 		GetClientName(target, t_name, sizeof(t_name));
-		
+		char c_name[32];
+		GetClientName(client, c_name, sizeof(c_name));
+
+		switch(VAR_CTYPE) {
+			case VOTE_BAN: {
+				char reason[64];
+				gReasons.GetString(g_VoteChoise[client].voteban_reason, reason, sizeof(reason));
+				PrintToChatAll("\x04[GameVoting]\x01 %t", "gv_startvote_ban", c_name, t_name, reason);
+			}
+			case VOTE_KICK: {
+				char reason[64];
+				gReasons.GetString(g_VoteChoise[client].voteban_reason, reason, sizeof(reason));
+				PrintToChatAll("\x04[GameVoting]\x01 %t", "gv_startvote_kick", c_name, t_name, reason);
+			}
+			default: {
+			}
+		}
+
 		for(int i = 1; i <= MaxClients; i++) {
 			if(IsCorrectPlayer(i)) {
 				// start vote menus
@@ -1119,6 +1074,7 @@ public void DoAction(int client, int type, int last) {
 			}
 
 			ServerCommand("sm_ban #%d %d \"Gamevoting (%N)(%s)\"", GetClientUserId(client), CONVAR_BAN_DURATION.IntValue, last, reason);
+			KickClient(client, "Banned by GameVoting (%s)", reason);
 		}
 		case VOTE_KICK: {
 			ClearChoise(client); // clear votes of players if kick or ban

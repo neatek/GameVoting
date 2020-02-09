@@ -1,10 +1,11 @@
-# GameVoting 1.8.9
+# GameVoting 1.9
 Light voting plugin Sourcemod.net for TF2, CSS, CSGO etc
 
 [![HitCount](http://hits.dwyl.io/neatek/GameVoting.svg)](http://hits.dwyl.io/neatek/GameVoting)
 
 # How to Install
 Replace `addons` folder
+Require: Sourcemod 1.10, if you use lower sm - recompile it on your version
 
 # Contact me
 [![discord](https://neatek.ru/img/Join_me_on_Discord_small.png)](https://discord.gg/J7eSXuU)
