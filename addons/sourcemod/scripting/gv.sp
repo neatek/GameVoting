@@ -74,6 +74,7 @@ public Plugin myinfo =
 #define CONVAR_ENABLE_LOGS ConVars[19]
 #define CONVAR_START_VOTE_MIN ConVars[20]
 #define CONVAR_BOT_ENABLED ConVars[21]
+#define CONVAR_ONLY_TEAMMATES ConVars[22]
 #define LOGS_ENABLED if(strlen(LogFilePath) > 0 && CONVAR_ENABLE_LOGS.IntValue > 0)
 //#define PLUGIN_DEBUG 1
 //#define PLUGIN_DEBUG_MODE 1
@@ -92,7 +93,7 @@ enum struct ENUM_KICKED_PLAYERS
 	char Steam[32];
 }
 int g_startvote_delay = 0;
-ConVar ConVars[22];
+ConVar ConVars[23];
 char LogFilePath[512];
 ArrayList gReasons;
 ENUM_VOTE_CHOISE g_VoteChoise[MAXPLAYERS+1];
@@ -177,6 +178,7 @@ public void register_ConVars() {
 	CONVAR_START_VOTE_DELAY = CreateConVar("gamevoting_startvote_delay", "20", "Delay between public votes in seconds (def:20)", _, true, 5.0, false);
 	CONVAR_START_VOTE_MIN = CreateConVar("gamevoting_startvote_min", "4", "Minimum players for start \"startvote\" feature (def:4)", _, true, 2.0);
 	CONVAR_BOT_ENABLED = CreateConVar("gamevoting_bots_enabled", "0", "Disable of enable bots in votes (def:0)", _, true, 0.0, true, 1.0);
+	CONVAR_ONLY_TEAMMATES = CreateConVar("gamevoting_only_teammates", "0", "Disable of enable only teammates in votes (def:0)", _, true, 0.0, true, 1.0);
 	// Listeners
 	AddCommandListener(OnClientCommands, "say");
 	AddCommandListener(OnClientCommands, "say_team");
@@ -873,6 +875,12 @@ public void ShowMenu(int client, int type, bool startvote_force) {
 		char Name[48], id[11];
 		for(int target=0;target<MaxClients;target++) {
 			VALID_TARGET {
+
+				if(CONVAR_ONLY_TEAMMATES.IntValue > 0) {
+					if(GetClientTeam(target) != GetClientTeam(client)) {
+						continue;
+					}
+				}
 			
 				if(target != client && !HasImmunity(target)) {
 					IntToString(target, id, sizeof(id));
