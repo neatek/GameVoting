@@ -649,7 +649,7 @@ public bool IsCorrectPlayer(int client) {
 		return false;
 	}
 	
-	if(CONVAR_BOT_ENABLED.IntValue < 1) {
+	if(CONVAR_BOT_ENABLED.IntValue > 0) {
 		if(IsFakeClient(client) || IsClientSourceTV(client)) {
 			return false;
 		}
