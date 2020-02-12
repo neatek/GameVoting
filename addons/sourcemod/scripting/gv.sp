@@ -539,8 +539,10 @@ public void SetChoise(int type, int client, int target) {
 			
 			int needed = GetCountNeeded(type);
 			
-			if(needed < 1) {
-				needed = 3;
+			if(CONVAR_BOT_ENABLED.IntValue < 1) {
+				if(needed < 1) {
+					needed = 3;
+				}
 			}
 			
 			int current = 0;
@@ -649,7 +651,7 @@ public bool IsCorrectPlayer(int client) {
 		return false;
 	}
 	
-	if(CONVAR_BOT_ENABLED.IntValue > 0) {
+	if(CONVAR_BOT_ENABLED.IntValue < 1) {
 		if(IsFakeClient(client) || IsClientSourceTV(client)) {
 			return false;
 		}
