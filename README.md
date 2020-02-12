@@ -14,10 +14,10 @@ Require: Sourcemod 1.10, if you use lower sm - recompile it on your version
 - https://www.patreon.com/neatek
 
 # Changes:
-- RELEASED 04.08.2017 - start voting by command for all users using menus. (voteban - yes/no)
-- RELEASED 07.08.2017 - translations.
-- RELEASED 07.08.2017 - improvements.
-- RELEASED 07.08.2017 - bug fixes.
-- RELEASED 20.08.2017 - voteban reasons for "StartVote" feature/
-- RELEASED 27.01.2020 - new Enum struct syntax
-- RELEASED 12.02.2020 - Reasons fixed
+- 04.08.2017 - StartVote feature. (global voteban - yes/no)
+- 07.08.2017 - Translations.
+- 07.08.2017 - Improvements.
+- 07.08.2017 - Bug fixes.
+- 20.08.2017 - Voteban reasons for "StartVote" feature.
+- 27.01.2020 - new Enum struct syntax. Support >SM1.10.x
+- 12.02.2020 - Reasons fixed.
