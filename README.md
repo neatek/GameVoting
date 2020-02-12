@@ -10,8 +10,21 @@ Require: Sourcemod 1.10, if you use lower sm - recompile it on your version
 
 # Support:
 - https://www.paypal.me/neatek/10usd
-- https://neatek.ru/gvsupport/
-- https://www.patreon.com/neatek
+
+[![webadmin](http://neatek.ru/gamevoting-webadmin.png)](https://discord.gg/J7eSXuU)
+
+If you want to see in release WebAdmin for GameVoting you can donate.
+Release on 280$ reached, or you can buy it for your project 180$.
+
+1. Built-in protect against attacks (exclude DDOS, use hardware protection). 
+2. With RestAPI. 
+3. Easy to install - NO composer, NO other packages - only Unpack archive & import SQL.
+4. One database for all your servers - share mute, bans between servers. 
+5. Dark / White Theme Switcher, Icons :yum: 
+6. API key will be automatically changed when you will install web-scripts. 
+7. Based on Light Framework
+8. >PHP7.3 >MySQL5.5
+9. Funny quotes in footer :ok_hand: 
 
 # Changes:
 - 04.08.2017 - StartVote feature. (global voteban - yes/no)
