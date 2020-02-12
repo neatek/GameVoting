@@ -12,7 +12,7 @@
 ***/
 #pragma semicolon 1
 #pragma newdecls required
-#define VERSION "1.9.0"
+#define VERSION "1.9.1"
 #define REASON_LEN 68
 #define EVENT_PARAMS Handle event, const char[] name, bool dontBroadcast
 #define VALID_PLAYER if(IsCorrectPlayer(client))
@@ -122,7 +122,14 @@ public void loadReasons() {
 				#if defined PLUGIN_DEBUG
 				LogMessage("Push reason: %s", buff);
 				#endif
-				gReasons.PushString(buff);
+
+				int index = gReasons.PushString(buff);
+
+				LOGS_ENABLED {
+					LogToFile(LogFilePath, "Reason loaded : %s (index : %d)", buff, index);
+					PrintToServer("Reason loaded : %s (index : %d)", buff, index);
+				}
+				
 				oLines++;
 			}
 			else
@@ -184,11 +191,15 @@ public int MenuHandler_Reason(Menu menu, MenuAction action, int client, int item
 	else if(action == MenuAction_Select) 
 	{
 		char item1[11];
-		GetMenuItem(menu, client, item1, sizeof(item1));
+		GetMenuItem(menu, item, item1, sizeof(item1));
 		g_VoteChoise[client].voteban_reason = StringToInt(item1); // reason from array
-		//const ENUM_VOTE_CHOISE class = g_VoteChoise[client];
-		//g_VoteChoise[client] 
-		//g_VoteChoise[client] = StringToInt(item1); // reason from array
+		LOGS_ENABLED {
+			char reason[64];
+			if(g_VoteChoise[client].voteban_reason > -1)
+				gReasons.GetString(g_VoteChoise[client].voteban_reason, reason, sizeof(reason));
+			PrintToServer("Player %N choised reason : %s - #%i - #%i",  client, reason, g_VoteChoise[client].voteban_reason, StringToInt(item1));
+			LogToFile(LogFilePath, "Player %N choised reason : %s - #%i - #%i",  client, reason, g_VoteChoise[client].voteban_reason, StringToInt(item1));
+		}
 		ShowMenu(client, VOTE_BAN, true);
 	}
 }
@@ -196,16 +207,19 @@ public int MenuHandler_Reason(Menu menu, MenuAction action, int client, int item
 public void DisplayReasons(int client) {
 	Menu mReasons = CreateMenu(MenuHandler_Reason);
 	SetMenuTitle(mReasons, "[GameVoting] Reason");
-
 	int sSize = ((gReasons.Length)-1);
 	char buff[REASON_LEN];
 	char buff2[18];
 	for(int i = 0; i <= sSize; i++) {
 		gReasons.GetString(i, buff, sizeof(buff));
 		IntToString(i, buff2, sizeof(buff2));
-		AddMenuItem(mReasons, buff2, buff, ITEMDRAW_DEFAULT);
+		//AddMenuItem(mReasons, buff2, buff, ITEMDRAW_DEFAULT);
+		mReasons.AddItem(buff2, buff, ITEMDRAW_DEFAULT);
+		LOGS_ENABLED {
+			//LogToFile(LogFilePath, "Reason loaded : %s (index : %d)", buff, index);
+			PrintToServer("Display menu reason: %s - %s ", buff2, buff);
+		}
 	}
-
 	DisplayMenu(mReasons, client, 0);
 }
 
@@ -551,6 +565,7 @@ public void SetChoise(int type, int client, int target) {
 					
 				case VOTE_BAN: {
 					strcopy(VAR_VOTEBAN, 32, auth);
+					//g_VoteChoise[i].voteban_reason
 					current = GetCountVotes(target, VOTE_BAN);
 					//PrintToChatAll("Player %N voted for ban %N. (%d/%d)", client, target, current, needed);
 					char c_name[32],t_name[32];
@@ -558,11 +573,18 @@ public void SetChoise(int type, int client, int target) {
 					GetClientName(target, t_name, sizeof(t_name));
 					PrintToChatAll("\x04[GameVoting]\x01 %t", "gv_voted_for_ban", c_name, t_name, current, needed);
 					
+
+
 					LOGS_ENABLED {
+						char reason[64];
+						if(g_VoteChoise[client].voteban_reason > -1)
+							gReasons.GetString(g_VoteChoise[client].voteban_reason, reason, sizeof(reason));
+
 						char auth1[32];//,auth2[32];
 						player_steam(client, auth1, sizeof(auth1)); 
 						//player_steam(target, auth2, sizeof(auth1));
-						LogToFile(LogFilePath, "Player %N(%s) voted for ban %N(%s). (%d/%d)",  client, auth1, target, auth, current, needed);
+						LogToFile(LogFilePath, "Player %N(%s) voted for ban %N(%s). (%d/%d) (Reason: %s - #%d)",  client, auth1, target, auth, current, needed, reason, g_VoteChoise[client].voteban_reason);
+						PrintToServer("Player %N(%s) voted for ban %N(%s). (%d/%d) (Reason: %s - #%d)",  client, auth1, target, auth, current, needed, reason, g_VoteChoise[client].voteban_reason);
 					}
 				}
 				
@@ -904,20 +926,20 @@ public void StartVote(int client, int target, int type) {
 				FormatEx(s_typeInitiator,sizeof(s_typeInitiator),"%d|%d|%d",client,target,VAR_CTYPE);
 				
 				char s_Menu[86];
+				
+
 				switch(VAR_CTYPE) {
 					case VOTE_BAN: {
 						//FormatEx(s_Menu,sizeof(s_Menu),"GAMEVOTING - Ban %N?", target);
-						Format(s_Menu, sizeof(s_Menu), "GAMEVOTING - %T", "gv_ban_title_question", i, t_name);
-						
 						char reason[64];
 						gReasons.GetString(g_VoteChoise[client].voteban_reason, reason, sizeof(reason));
-						
+						Format(s_Menu, sizeof(s_Menu), "GAMEVOTING - %T", "gv_ban_title_question", i, t_name, reason);
 						if(strlen(s_logs) < 1) {
-						LOGS_ENABLED {
-							char auth[32], auth1[32];
-							player_steam(client, auth, sizeof(auth)); player_steam(target, auth1, sizeof(auth1));
-							FormatEx(s_logs, sizeof(s_logs), "Player %N(%s) started public vote for ban %N(%s). Reason = %s",  client, auth,target,auth1,reason);
-						}
+							LOGS_ENABLED {
+								char auth[32], auth1[32];
+								player_steam(client, auth, sizeof(auth)); player_steam(target, auth1, sizeof(auth1));
+								FormatEx(s_logs, sizeof(s_logs), "Player %N(%s) started public vote for ban %N(%s). Reason = %s",  client, auth,target,auth1,reason);
+							}
 						}
 					}
 					case VOTE_KICK: {
@@ -949,19 +971,14 @@ public void StartVote(int client, int target, int type) {
 						return;
 					}	
 				}
+				
 				mymenu.SetTitle(s_Menu);
-				
 				mymenu.AddItem("","----", ITEMDRAW_DISABLED);
 				mymenu.AddItem("","----", ITEMDRAW_DISABLED);
-				
 				Format(s_Menu, sizeof(s_Menu), "%T", "gv_yes", i);
-				
 				mymenu.AddItem(s_typeInitiator,s_Menu);
-				
 				Format(s_Menu, sizeof(s_Menu), "%T", "gv_no", i);
-				
 				mymenu.AddItem("",s_Menu);
-				
 				mymenu.Display(i, MENU_TIME_FOREVER);
 			}
 		}
@@ -1068,10 +1085,10 @@ public void DoAction(int client, int type, int last) {
 				LogToFile(LogFilePath, "Player %N(%s) was banned by voting. (Last voted player: %N)",  client, auth,last);
 			}
 			
-			int reason_num = HasReason(client);
+			//int reason_num = HasReason(last);
 			char reason[64];
-			if(reason_num > -1) {
-				gReasons.GetString(reason_num, reason, sizeof(reason));
+			if(g_VoteChoise[last].voteban_reason > -1) {
+				gReasons.GetString(g_VoteChoise[last].voteban_reason, reason, sizeof(reason));
 			}
 			else {
 				strcopy(reason, sizeof(reason), "Empty reason");
@@ -1121,8 +1138,9 @@ public int HasReason(int target) {
 	char auth[32];
 	player_steam(target, auth, sizeof(auth));
 	for(int i =0 ; i <= MAXPLAYERS; i ++) {
+		/*Find steamid in array*/
+		/*VAR_IVOTEBAN g_VoteChoise[i].vbSteam*/
 		if(StrEqual(VAR_IVOTEBAN,auth,true)) {
-			//strcopy(VAR_IVOTEBAN, 32, "");
 			if(g_VoteChoise[i].voteban_reason > 0) {
 				return g_VoteChoise[i].voteban_reason;
 			}

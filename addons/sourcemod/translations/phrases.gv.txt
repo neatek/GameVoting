@@ -79,13 +79,13 @@
 	}
 	"gv_ban_title_question"
 	{
-		"#format" "{1:s}"
-		"en" "BAN {1}?"
-		"pt" "BAN {1}?"
-		"hu" "{1} KITILTÁSA?"	
-		"ru" "ЗАБАНИТЬ {1}?"
-		"fr" "BANNIR {1}?"
-		"es" "BANEAR A {1}?"
+		"#format" "{1:s},{2:s}"
+		"en" "BAN {1} ({2})?"
+		"pt" "BAN {1} ({2})?"
+		"hu" "{1} KITILTÁSA ({2})?"	
+		"ru" "ЗАБАНИТЬ {1} ({2})?"
+		"fr" "BANNIR {1} ({2})?"
+		"es" "BANEAR A {1} ({2})?"
 	}
 	"gv_kick_title_question"
 	{
