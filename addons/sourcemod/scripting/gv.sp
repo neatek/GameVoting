@@ -73,6 +73,7 @@ public Plugin myinfo =
 #define CONVAR_AUTHID_TYPE ConVars[18]
 #define CONVAR_ENABLE_LOGS ConVars[19]
 #define CONVAR_START_VOTE_MIN ConVars[20]
+#define CONVAR_BOT_ENABLED ConVars[21]
 #define LOGS_ENABLED if(strlen(LogFilePath) > 0 && CONVAR_ENABLE_LOGS.IntValue > 0)
 //#define PLUGIN_DEBUG 1
 //#define PLUGIN_DEBUG_MODE 1
@@ -91,7 +92,7 @@ enum struct ENUM_KICKED_PLAYERS
 	char Steam[32];
 }
 int g_startvote_delay = 0;
-ConVar ConVars[21];
+ConVar ConVars[22];
 char LogFilePath[512];
 ArrayList gReasons;
 ENUM_VOTE_CHOISE g_VoteChoise[MAXPLAYERS+1];
@@ -168,6 +169,7 @@ public void register_ConVars() {
 	CONVAR_FLAG_START_VOTE = CreateConVar("gamevoting_startvote_flag", "", "Who can start voting for ban or something, set empty for all players (def:a)");
 	CONVAR_START_VOTE_DELAY = CreateConVar("gamevoting_startvote_delay", "20", "Delay between public votes in seconds (def:20)", _, true, 5.0, false);
 	CONVAR_START_VOTE_MIN = CreateConVar("gamevoting_startvote_min", "4", "Minimum players for start \"startvote\" feature (def:4)", _, true, 2.0);
+	CONVAR_BOT_ENABLED = CreateConVar("gamevoting_bots_enabled", "0", "Disable of enable bots in votes (def:0)", _, true, 0.0, true, 1.0);
 	// Listeners
 	AddCommandListener(OnClientCommands, "say");
 	AddCommandListener(OnClientCommands, "say_team");
@@ -647,11 +649,11 @@ public bool IsCorrectPlayer(int client) {
 		return false;
 	}
 	
-	#if !defined PLUGIN_DEBUG_MODE
-	if(IsFakeClient(client) || IsClientSourceTV(client)) {
-		return false;
+	if(CONVAR_BOT_ENABLED.IntValue < 1) {
+		if(IsFakeClient(client) || IsClientSourceTV(client)) {
+			return false;
+		}
 	}
-	#endif
 	
 	return true;
 }
