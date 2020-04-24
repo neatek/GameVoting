@@ -136,7 +136,7 @@
 		"ru" "Нет"
 		"fr" "Non"
 		"es" "No"
-		"en" "否"
+		"chi" "否"
 	}
 	"gv_startvote_ban"
 	{
