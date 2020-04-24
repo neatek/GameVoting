@@ -1,5 +1,6 @@
 # GameVoting 1.9.x
 Light voting plugin Sourcemod.net for TF2, CSS, CSGO etc
+Supports: Sourcebans++, MaterialAdmin, Sourcemod (2020)
 
 # WebAdmin:
 [![webadmin](http://neatek.ru/gamevoting-webadmin.png)](https://discord.gg/J7eSXuU)

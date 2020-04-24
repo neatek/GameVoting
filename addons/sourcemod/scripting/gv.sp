@@ -9,10 +9,15 @@
 	Contact me:
 	https://discord.gg/J7eSXuU
 	https://neatek.ru/en
+	Supports: Sourcebans++, MaterialAdmin, Sourcemod (2020)
 ***/
+#undef REQUIRE_PLUGIN
+#include <sourcebanspp>
+#include <sourcecomms>
+#include <materialadmin>
 #pragma semicolon 1
 #pragma newdecls required
-#define VERSION "1.9.1"
+#define VERSION "1.9.2"
 #define REASON_LEN 68
 #define EVENT_PARAMS Handle event, const char[] name, bool dontBroadcast
 #define VALID_PLAYER if(IsCorrectPlayer(client))
@@ -99,6 +104,51 @@ ArrayList gReasons;
 ENUM_VOTE_CHOISE g_VoteChoise[MAXPLAYERS+1];
 ENUM_KICKED_PLAYERS g_KickedPlayers[MAXPLAYERS+1];
 
+bool is_sourcebanspp_comms = false;
+bool is_sourcebanspp_bans = false;
+bool is_maadmin_comms = false;
+bool is_maadmin_bans = false;
+
+public bool sourcebanspp_bans() {
+	char fFile[86];
+	BuildPath(Path_SM, fFile, sizeof(fFile), "plugins/sbpp_main.smx");
+	LogMessage("[GameVoting] Sourcebans++ check bans file: %s", fFile);
+	if(FileExists(fFile)) {
+		return true;
+	}
+	return false;
+}
+
+public bool sourcebanspp_comms() {
+	char fFile[86];
+	BuildPath(Path_SM, fFile, sizeof(fFile), "plugins/sbpp_comms.smx");
+	LogMessage("[GameVoting] Sourcebans++ check comms file: %s", fFile);
+	if(FileExists(fFile)) {
+		return true;
+	}
+	return false;
+}
+
+public bool maadmin_comms() {
+	char fFile[86];
+	BuildPath(Path_SM, fFile, sizeof(fFile), "plugins/ma_basecomm.smx");
+	LogMessage("[GameVoting] MaterialAdmin check comms file: %s", fFile);
+	if(FileExists(fFile)) {
+		return true;
+	}
+	return false;
+}
+
+public bool maadmin_bans() {
+	char fFile[86];
+	BuildPath(Path_SM, fFile, sizeof(fFile), "plugins/materialadmin.smx");
+	LogMessage("[GameVoting] MaterialAdmin check bans file: %s", fFile);
+	if(FileExists(fFile)) {
+		return true;
+	}
+	return false;
+}
+
 public void loadReasons() {
 	if(gReasons != null) gReasons.Clear();
 	char fFile[86];
@@ -146,6 +196,11 @@ public void loadReasons() {
 }
 
 public void register_ConVars() {
+	is_sourcebanspp_comms = sourcebanspp_comms();
+	is_sourcebanspp_bans = sourcebanspp_bans();
+	is_maadmin_comms = maadmin_comms();
+	is_maadmin_bans = maadmin_bans();
+
 	// Global
 	CONVAR_VERSION = CreateConVar("sm_gamevoting_version", VERSION, "Version of gamevoting plugin. DISCORD - https://discord.gg/J7eSXuU , Author: Neatek, www.neatek.ru", FCVAR_SPONLY|FCVAR_REPLICATED|FCVAR_NOTIFY);
 	CONVAR_ENABLED = CreateConVar("gamevoting_enable", "1", "Enable or disable plugin (def:1)", _, true, 0.0, true, 1.0);	
@@ -197,12 +252,19 @@ public int MenuHandler_Reason(Menu menu, MenuAction action, int client, int item
 		g_VoteChoise[client].voteban_reason = StringToInt(item1); // reason from array
 		LOGS_ENABLED {
 			char reason[64];
-			if(g_VoteChoise[client].voteban_reason > -1)
+			if(g_VoteChoise[client].voteban_reason > -1) {
 				gReasons.GetString(g_VoteChoise[client].voteban_reason, reason, sizeof(reason));
+			}
 			PrintToServer("Player %N choised reason : %s - #%i - #%i",  client, reason, g_VoteChoise[client].voteban_reason, StringToInt(item1));
 			LogToFile(LogFilePath, "Player %N choised reason : %s - #%i - #%i",  client, reason, g_VoteChoise[client].voteban_reason, StringToInt(item1));
 		}
-		ShowMenu(client, VOTE_BAN, true);
+		// Handle StartVote Enable/Disable
+		if(CONVAR_START_VOTE_ENABLE.IntValue > 0) {
+			ShowMenu(client, VOTE_BAN, true);
+		}
+		else {
+			ShowMenu(client, VOTE_BAN, false);
+		}
 	}
 }
 
@@ -283,28 +345,20 @@ public void OnPluginEnd() {
 	UnhookEvent("player_disconnect", Event_PlayerDisconnected);
 }
 
-//LogToFile(LogFilePath, "Player %N(%s) was ungagged.",  client, player.steam(client));
 public void GVInitLog() {
 	loadReasons();
 	if(CONVAR_ENABLE_LOGS.IntValue > 0) {
-	BuildPath(Path_SM, LogFilePath, sizeof(LogFilePath), "logs/gamevoting/");
-	//if(strlen(LogFilePath) > 0) {
-	if(!DirExists(LogFilePath)) {
-		CreateDirectory(LogFilePath, 777);
-		//char ftime[68];
-		//FormatTime(ftime, sizeof(ftime), "logs/gamevoting/gv%m-%d.txt",  GetTime());
-		//BuildPath(Path_SM, LogFilePath, sizeof(LogFilePath), ftime);
-		//LogError("Error! Folder /logs/gamevoting/ doesnt exists! Please, create it to enable logs.");
-		//strcopy(LogFilePath,sizeof(LogFilePath), "");
-	}
-	char ftime[68];
-	FormatTime(ftime, sizeof(ftime), "logs/gamevoting/gv%m-%d.txt",  GetTime());
-	BuildPath(Path_SM, LogFilePath, sizeof(LogFilePath), ftime);
-	//}
-	
-		//if(StrEqual(LogFilePath,"logs/gamevoting/")) {
-		//	strcopy(LogFilePath,sizeof(LogFilePath), "");
-		//}
+		BuildPath(Path_SM, LogFilePath, sizeof(LogFilePath), "logs/gamevoting/");
+		if(!DirExists(LogFilePath)) {
+			CreateDirectory(LogFilePath, 777);
+		}
+		char ftime[68];
+		FormatTime(ftime, sizeof(ftime), "logs/gamevoting/gv%m-%d.txt",  GetTime());
+		BuildPath(Path_SM, LogFilePath, sizeof(LogFilePath), ftime);
+		LogToFile(LogFilePath, "Sourcebans++ Bans Detect: %b", is_sourcebanspp_bans);
+		LogToFile(LogFilePath, "Sourcebans++ Comms Detect: %b", is_sourcebanspp_comms);
+		LogToFile(LogFilePath, "MaterialAdmin Comms Detect: %b", is_maadmin_comms);
+		LogToFile(LogFilePath, "MaterialAdmin Bans Detect: %b", is_maadmin_bans);
 	}
 }
 
@@ -574,8 +628,6 @@ public void SetChoise(int type, int client, int target) {
 					GetClientName(client, c_name, sizeof(c_name));
 					GetClientName(target, t_name, sizeof(t_name));
 					PrintToChatAll("\x04[GameVoting]\x01 %t", "gv_voted_for_ban", c_name, t_name, current, needed);
-					
-
 
 					LOGS_ENABLED {
 						char reason[64];
@@ -630,14 +682,18 @@ public void SetChoise(int type, int client, int target) {
 				
 			}
 
-			if(current >= needed) {
+			if(current >= needed) 
+			{
 				DoAction(target, type, client);
 			}
-			else if(current >= CONVAR_START_VOTE_MIN.IntValue && StartVoteFlag(client)) {
-				if(type != VOTE_BAN) {
+			else if(current >= CONVAR_START_VOTE_MIN.IntValue && StartVoteFlag(client)) 
+			{
+				if(type != VOTE_BAN) 
+				{
 					ShowMenu(client, type, true);
 				}
-				else {
+				else 
+				{
 					DisplayReasons(client);
 				}
 			}
@@ -1102,7 +1158,22 @@ public void DoAction(int client, int type, int last) {
 				strcopy(reason, sizeof(reason), "Empty reason");
 			}
 
-			ServerCommand("sm_ban #%d %d \"Gamevoting (%N)(%s)\"", GetClientUserId(client), CONVAR_BAN_DURATION.IntValue, last, reason);
+			if(is_sourcebanspp_bans) 
+			{
+				char reasonstring[68];
+				Format(reasonstring, sizeof(reasonstring), "Gamevoting (%N)(%s)", last, reason);
+				SBPP_BanPlayer(0, client, CONVAR_BAN_DURATION.IntValue, reasonstring);
+			} 
+			else if(is_maadmin_bans) 
+			{
+				char reasonstring[68];
+				Format(reasonstring, sizeof(reasonstring), "Gamevoting (%N)(%s)", last, reason);
+				MABanPlayer(0, client, 1, CONVAR_BAN_DURATION.IntValue, reasonstring);
+			} 
+			else 
+			{
+				ServerCommand("sm_ban #%d %d \"Gamevoting (%N)(%s)\"", GetClientUserId(client), CONVAR_BAN_DURATION.IntValue, last, reason);
+			}
 
 			LOGS_ENABLED {
 				LogToFile(LogFilePath, "Server command: sm_ban #%d %d \"Gamevoting (%N)(%s)\"", GetClientUserId(client), CONVAR_BAN_DURATION.IntValue, last, reason);
@@ -1123,10 +1194,6 @@ public void DoAction(int client, int type, int last) {
 			PushKickedPlayer(client);
 		}
 		case VOTE_MUTE: {
-			/*
-			[SourceComms++] Usage: sm_mute <#userid|name> [time|0] [reason]
-			[SourceComms++] Usage: sm_mute <#userid|name> [reason]
-			*/
 			ClearVotesForClient(client, VOTE_MUTE);
 
 			LOGS_ENABLED {
@@ -1135,7 +1202,22 @@ public void DoAction(int client, int type, int last) {
 				LogToFile(LogFilePath, "Player %N(%s) was muted by voting. (Last voted player: %N)",  client, auth,last);
 			}
 
-			ServerCommand("sm_silence #%d %d \"Muted by Gamevoting (%N)\"", GetClientUserId(client), CONVAR_MUTE_DURATION.IntValue, last);
+			if(is_sourcebanspp_comms) {
+				char reasonstring[68];
+				Format(reasonstring, sizeof(reasonstring), "Muted by Gamevoting (%N)", last);
+				SourceComms_SetClientMute(client, true, CONVAR_MUTE_DURATION.IntValue, true, reasonstring);
+				SourceComms_SetClientGag(client, true, CONVAR_MUTE_DURATION.IntValue, true, reasonstring);
+			}
+			else if(is_maadmin_comms) {
+				char reasonstring[68];
+				Format(reasonstring, sizeof(reasonstring), "Muted by Gamevoting (%N)", last);
+				MASetClientMuteType(0, client, reasonstring, 5, CONVAR_MUTE_DURATION.IntValue);
+				MASetClientMuteType(0, client, reasonstring, 6, CONVAR_MUTE_DURATION.IntValue);
+			}
+			else {
+			 	ServerCommand("sm_silence #%d %d \"Muted by Gamevoting (%N)\"", GetClientUserId(client), CONVAR_MUTE_DURATION.IntValue, last);
+			}
+			
 
 		}
 	}
