@@ -37,7 +37,7 @@
 	{
 		"#format" "{1:d}"
 		"en" "Please wait {1}sec before start public vote."
-		"pt" "Por favor, aguarde {1}seg antes de começar a votação pública."
+		"pt" "Por favor, aguarde {1} segundos antes de começar a votação pública."
 		"hu" "Kérlek várj {1}másodpercet mielőtt szavazást kezdeményeznél."
 		"ru" "Пожалуйста подождите {1} с. перед тем как начать голосование."
 		"fr" "Veuillez patienter {1} sec avant de commencer le vote public."
@@ -142,7 +142,7 @@
 	{
 		"#format" "{1:s},{2:s},{3:s}"
 		"en" "Player {1} started public vote for ban player {2} (Reason: {3})"
-		"pt" "O jogador {1} iniciou a votação pública para o banido {2} (Motivo: {3})"
+		"pt" "Player {1} iniciou uma votação pública para banir {2}. (Motivo: {3})"
 		"hu" "A (z) {1} játékos elindította a nyilvános szavazást a (2) játékos tiltásáról (Ok: {3})"
 		"ru" "Игрок {1} запустил публичное голосование за бан {2} (Причина: {3})"
 		"fr" "Le joueur {1} a lancé un vote d'interdiction publique pour {2} (Raison: {3})"
@@ -153,7 +153,7 @@
 	{
 		"#format" "{1:s},{2:s},{3:s}"
 		"en" "Player {1} started public vote for kick player {2} (Reason: {3})"
-		"pt" "O jogador {1} lançou uma votação pública para o chute {2} (Razão: {3})"
+		"pt" "Player {1} iniciou uma votação pública para kickar {2}. (Motivo: {3})"
 		"hu" "A (z) {1} játékos nyilvános szavazást indított a (z) {2} rúgásért (Ok: {3})"
 		"ru" "Игрок {1} запустил публичное голосование за кик {2} (Причина: {3})"
 		"fr" "Le joueur {1} a lancé un vote public pour le coup de pied {2} (Raison: {3})"
