@@ -1,23 +1,24 @@
 //#include <sourcemod>
 /***
 	Programming is philosophy.
-	Silence is golden.
 	# GAMEVOTING #
 		Vladimir Zhelnov @neatek
-		Sourcemod 1.8 -gv188 // 2017
-		Sourcemod 1.10 - gv190 // 2020
 	Contact me:
-	https://discord.gg/J7eSXuU
-	https://neatek.ru/en
-	Supports: Sourcebans++, MaterialAdmin, Sourcemod (2020)
+	- https://discord.gg/J7eSXuU
+	- https://neatek.ru/en
+	Supports: 
+	- Sourcebans++
+	- MaterialAdmin
+	- BaseComms
 ***/
 #undef REQUIRE_PLUGIN
 #include <sourcebanspp>
 #include <sourcecomms>
 #include <materialadmin>
+#include <banning>
 #pragma semicolon 1
 #pragma newdecls required
-#define VERSION "1.9.2"
+#define VERSION "2.0.0"
 #define REASON_LEN 68
 #define EVENT_PARAMS Handle event, const char[] name, bool dontBroadcast
 #define VALID_PLAYER if(IsCorrectPlayer(client))
@@ -1172,14 +1173,19 @@ public void DoAction(int client, int type, int last) {
 			} 
 			else 
 			{
-				ServerCommand("sm_ban #%d %d \"Gamevoting (%N)(%s)\"", GetClientUserId(client), CONVAR_BAN_DURATION.IntValue, last, reason);
+				char reasonstring[68];
+				Format(reasonstring, sizeof(reasonstring), "Gamevoting (%N)(%s)", last, reason);
+				if( BanClient(client, CONVAR_BAN_DURATION.IntValue, BANFLAG_AUTO, reasonstring, reasonstring) ) {
+					//KickClient(client, "Banned by GameVoting (%s)", reason);
+				}
 			}
 
-			LOGS_ENABLED {
-				LogToFile(LogFilePath, "Server command: sm_ban #%d %d \"Gamevoting (%N)(%s)\"", GetClientUserId(client), CONVAR_BAN_DURATION.IntValue, last, reason);
+			//LOGS_ENABLED {
+			//	LogToFile(LogFilePath, "Server command: sm_ban #%d %d \"Gamevoting (%N)(%s)\"", GetClientUserId(client), CONVAR_BAN_DURATION.IntValue, last, reason);
+			//}
+			VALID_PLAYER {
+				KickClient(client, "Banned by GameVoting (%s)", reason);
 			}
-
-			KickClient(client, "Banned by GameVoting (%s)", reason);
 		}
 		case VOTE_KICK: {
 			ClearChoise(client); // clear votes of players if kick or ban
