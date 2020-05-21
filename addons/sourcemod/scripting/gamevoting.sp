@@ -373,12 +373,14 @@ public int FindFreeSlot() {
 	return -1;
 }
 
-public bool isadmin(int client)
+stock bool IsAdmin(int client)
 {
-	if(GetUserAdmin(client) != INVALID_ADMIN_ID) 
-		return true;
-	
-	return false;
+	AdminId admin = GetUserAdmin(client);
+
+	if(admin == INVALID_ADMIN_ID)
+		return false;
+		
+	return GetAdminFlag(admin, Admin_Generic);
 }
 
 public bool adminsonserver()
@@ -386,7 +388,7 @@ public bool adminsonserver()
 	bool result = false;
 	for(int i=0; i < MaxClients; ++i) {
 		if(IsCorrectPlayer(i)) {
-			if(isadmin(i)) {
+			if(IsAdmin(i)) {
 				result = true;
 				break;
 			}
@@ -394,7 +396,6 @@ public bool adminsonserver()
 	}
 	return result;
 }
-
 
 public void ClearVotesForClient(int client, int type) {
 	VALID_PLAYER {
