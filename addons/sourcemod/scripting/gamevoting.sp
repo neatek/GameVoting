@@ -17,7 +17,7 @@
 #include <materialadmin>
 #pragma semicolon 1
 #pragma newdecls required
-#define VERSION "1.9.2"
+#define VERSION "1.9.3"
 #define REASON_LEN 68
 #define EVENT_PARAMS Handle event, const char[] name, bool dontBroadcast
 #define VALID_PLAYER if(IsCorrectPlayer(client))
