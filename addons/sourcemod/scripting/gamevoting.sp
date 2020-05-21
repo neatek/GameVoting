@@ -238,8 +238,8 @@ public void register_ConVars() {
 	AddCommandListener(OnClientCommands, "say");
 	AddCommandListener(OnClientCommands, "say_team");
 	// Configs&Translations
-	AutoExecConfig(true, "Gamevoting");
-	LoadTranslations("phrases.gv");
+	AutoExecConfig(true, "gamevoting");
+	LoadTranslations("gamevoting.phrases");
 }
 
 
