@@ -1180,7 +1180,7 @@ public void DoAction(int client, int type, int last) {
 				LogToFile(LogFilePath, "Server command: sm_ban #%d %d \"Gamevoting (%N)(%s)\"", GetClientUserId(client), CONVAR_BAN_DURATION.IntValue, last, reason);
 			}
 
-			KickClient(client, "Banned by GameVoting (%s)", reason);
+			/*KickClient(client, "Banned by GameVoting (%s)", reason);*/
 		}
 		case VOTE_KICK: {
 			ClearChoise(client); // clear votes of players if kick or ban
