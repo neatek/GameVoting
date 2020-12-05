@@ -1,0 +1,2 @@
+Drag and drop file gamevoting.sp on compile.exe
+Брось файл gamevoting.sp на файл compile.exe
