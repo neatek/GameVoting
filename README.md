@@ -35,6 +35,11 @@ Require: Sourcemod 1.10, if you use lower sm - recompile it on your version
 - 20.08.2017 - Voteban reasons for "StartVote" feature.
 - 27.01.2020 - new Enum struct syntax. Support >SM1.10.x
 - 12.02.2020 - Reasons fixed.
+- 06.12.2020 - Reasons length must be more than 1 char.
+- 06.12.2020 - MACOREVERSION updated - 0.8.0
+- 06.12.2020 - Minimal required count of players for ban - 3.
+- 06.12.2020 - Detecting of ban systems improved.
+- 06.12.2020 - Removed some useless logs, added new usefull logs.
 
 # Config:
 - gamevoting_authid "1"
