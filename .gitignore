@@ -49,3 +49,4 @@ addons/sourcemod/logs/gamevoting
 
 # Plugin *.smx
 addons/sourcemod/plugins
+*.dat
