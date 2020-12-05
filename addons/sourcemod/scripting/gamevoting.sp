@@ -141,14 +141,23 @@ public bool detect_ban_system(int type) {
 }
 
 public void loadReasons() {
-	if(gReasons != null) gReasons.Clear();
+	if(gReasons != null) {
+		gReasons.Clear();
+	}
+	
 	char fFile[86];
 	BuildPath(Path_SM, fFile, sizeof(fFile), "configs/gvreasons.txt");
+
 	if(FileExists(fFile))
 	{
 		File oFile = OpenFile(fFile,"r");
-		if(oFile == null) SetFailState("I can't open file: addons/sourcemod/configs/gvreasons.txt");
-		if(FileSize(fFile) < 5) SetFailState("Please, fill this file: addons/sourcemod/configs/gvreasons.txt");
+		if(oFile == null) {
+			SetFailState("I can't open file: addons/sourcemod/configs/gvreasons.txt");
+		}
+		if(FileSize(fFile) < 5) {
+			SetFailState("Please, fill this file: addons/sourcemod/configs/gvreasons.txt");
+		}
+
 		char buff[REASON_LEN];
 		int oLines = 1;
 		gReasons = new ArrayList(REASON_LEN, 0);
@@ -159,36 +168,34 @@ public void loadReasons() {
 				continue;
 			}
 			TrimString(buff);
-			if(strlen(buff) > 3)
+			if(strlen(buff) > 1)
 			{
 				#if defined PLUGIN_DEBUG
-				LogMessage("Push reason: %s", buff);
+					LogMessage("Push reason: %s", buff);
 				#endif
 				int index = gReasons.PushString(buff);
 				LOGS_ENABLED {
 					LogToFile(LogFilePath, "Reason loaded : %s (index : %d)", buff, index);
-					PrintToServer("Reason loaded : %s (index : %d)", buff, index);
+					PrintToServer("[GameVoting] Reason loaded : %s (index : %d)", buff, index);
 				}
 				oLines++;
 			}
 			else
 			{
-				LogError("Can't add reason: %s, because its smaller than 3 letters. (LINE: %d)", buff, oLines);
+				LOGS_ENABLED {
+					// LogError("[GameVoting] Can't add reason: %s, because its smaller than 1 letters. (LINE: %d)", buff, oLines);
+					LogToFile(LogFilePath, "[Error] Can't add reason: %s, because its smaller than 1 letters. (LINE: %d)", buff, oLines);
+				}
 			}
 		}
-		
 		oFile.Close();
 	}
-	else
+	else {
 		SetFailState("Please, create file in directory: addons/sourcemod/configs/gvreasons.txt, with reasons on one line!");
+	}
 }
 
 public void register_ConVars() {
-	detect_ban_system(BANSYS_SOURCEBANSPP);
-	detect_ban_system(BANSYS_SOURCEBANSPP_COMMS);
-	detect_ban_system(BANSYS_MADMIN);
-	detect_ban_system(BANSYS_MADMIN_COMMS);
-
 	// Global
 	CONVAR_VERSION = CreateConVar("sm_gamevoting_version", VERSION, "Version of gamevoting plugin. DISCORD - https://discord.gg/J7eSXuU , Author: Neatek, www.neatek.ru", FCVAR_SPONLY|FCVAR_REPLICATED|FCVAR_NOTIFY);
 	CONVAR_ENABLED = CreateConVar("gamevoting_enable", "1", "Enable/Disable plugin (def:1)", _, true, 0.0, true, 1.0);	
@@ -232,7 +239,9 @@ public void register_ConVars() {
 
 
 public int MenuHandler_Reason(Menu menu, MenuAction action, int client, int item) {
-	if(action == MenuAction_End) CloseHandle(menu);
+	if(action == MenuAction_End) {
+		CloseHandle(menu);
+	}
 	else if(action == MenuAction_Select) 
 	{
 		char item1[11];
@@ -266,9 +275,9 @@ public void DisplayReasons(int client) {
 		gReasons.GetString(i, buff, sizeof(buff));
 		IntToString(i, buff2, sizeof(buff2));
 		mReasons.AddItem(buff2, buff, ITEMDRAW_DEFAULT);
-		LOGS_ENABLED {
-			PrintToServer("Display menu reason: %s - %s ", buff2, buff);
-		}
+		// LOGS_ENABLED {
+		// 	PrintToServer("Display menu reason: %s - %s ", buff2, buff);
+		// }
 	}
 	DisplayMenu(mReasons, client, 0);
 }
@@ -328,6 +337,10 @@ public void GVInitLog() {
 		FormatTime(ftime, sizeof(ftime), "logs/gamevoting/gv%m-%d.txt",  GetTime());
 		BuildPath(Path_SM, LogFilePath, sizeof(LogFilePath), ftime);
 	}
+	detect_ban_system(BANSYS_SOURCEBANSPP);
+	detect_ban_system(BANSYS_SOURCEBANSPP_COMMS);
+	detect_ban_system(BANSYS_MADMIN);
+	detect_ban_system(BANSYS_MADMIN_COMMS);
 }
 
 public int FindFreeSlot() {
@@ -341,29 +354,27 @@ public int FindFreeSlot() {
 	return -1;
 }
 
-stock bool IsAdmin(int client)
+
+public bool IsAdmin(int client)
 {
 	AdminId admin = GetUserAdmin(client);
-
 	if(admin == INVALID_ADMIN_ID)
 		return false;
-		
 	return GetAdminFlag(admin, Admin_Generic);
 }
 
+
 public bool adminsonserver()
 {
-	bool result = false;
 	for(int i=0; i < MaxClients; ++i) {
 		if(IsCorrectPlayer(i)) {
-			if(IsAdmin(i)) {
-				result = true;
-				break;
-			}
+			if(IsAdmin(i))
+				return true;
 		}
 	}
-	return result;
+	return false;
 }
+
 
 public void ClearVotesForClient(int client, int type) {
 	VALID_PLAYER {
