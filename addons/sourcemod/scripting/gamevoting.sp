@@ -1,4 +1,3 @@
-//#include <sourcemod>
 /***
 	Programming is philosophy.
 	Vladimir Zhelnov @neatek
@@ -12,368 +11,19 @@
 	Old versions:
 	https://neatek.ru/en/plugins/neatek-gamevoting-old-plugin-versions-archived
 ***/
-
 #undef REQUIRE_PLUGIN
 #include <sourcebanspp>
 #include <sourcecomms>
 #include <materialadmin>
-#pragma semicolon 1
-#pragma newdecls required
-#define VERSION "1.9.3"
-#define REASON_LEN 68
-#define EVENT_PARAMS Handle event, const char[] name, bool dontBroadcast
-#define VALID_PLAYER if(IsCorrectPlayer(client))
-#define VALID_TARGET if(IsCorrectPlayer(target))
-#define EVENT_GET_PLAYER GetClientOfUserId(GetEventInt(event, "userid"));
-
-public Plugin myinfo =
-{
-	name = "GameVoting",
-	author = "Neatek",
-	description = "Simple sourcemod plugin for voting",
-	version = VERSION,
-	url = "https://github.com/neatek/GameVoting"
-};
-
-#define VOTE_BAN 1
-#define VOTE_KICK 2
-#define VOTE_MUTE 3
-#define VOTE_SILENCE 4
-#define VAR_VOTEBAN g_VoteChoise[client].vbSteam
-#define VAR_VOTEKICK g_VoteChoise[client].vkSteam
-#define VAR_VOTEMUTE g_VoteChoise[client].vmSteam
-#define VAR_VOTESILENCE g_VoteChoise[client].vsSteam
-#define VAR_IVOTEBAN g_VoteChoise[i].vbSteam
-#define VAR_IVOTEKICK g_VoteChoise[i].vkSteam
-#define VAR_IVOTEMUTE g_VoteChoise[i].vmSteam
-#define VAR_IVOTESILENCE g_VoteChoise[i].vsSteam
-#define VAR_TVOTEBAN g_VoteChoise[target].vbSteam
-#define VAR_TVOTEKICK g_VoteChoise[target].vkSteam
-#define VAR_TVOTEMUTE g_VoteChoise[target].vmSteam
-#define VAR_TVOTESILENCE g_VoteChoise[target].vsSteam
-#define VAR_CTYPE g_VoteChoise[client].current_type
-#define PLUG_TAG "GameVoting"
-#define BAN_COMMAND  "voteban"
-#define KICK_COMMAND "votekick"
-#define GAG_COMMAND  "votegag"
-#define MUTE_COMMAND "votemute"
-#define SILENCE_COMMAND "votesilence"
-#define CONVAR_VERSION ConVars[0]
-#define CONVAR_ENABLED ConVars[1]
-#define CONVAR_BAN_DURATION ConVars[2]
-#define CONVAR_MUTE_DURATION ConVars[3]
-//#define CONVAR_SILENCE_DURATION ConVars[4] 
-#define CONVAR_KICK_DURATION ConVars[5]
-#define CONVAR_BAN_ENABLE ConVars[6]
-#define CONVAR_KICK_ENABLE ConVars[7]
-#define CONVAR_MUTE_ENABLE ConVars[8]
-//#define CONVAR_SILENCE_ENABLE ConVars[9]
-#define CONVAR_MIN_PLAYERS ConVars[10]
-#define CONVAR_AUTODISABLE ConVars[11]
-#define CONVAR_BAN_PERCENT ConVars[12]
-#define CONVAR_KICK_PERCENT ConVars[13]
-#define CONVAR_MUTE_PERCENT ConVars[14]
-//#define CONVAR_SILENCE_PERCENT ConVars[15]
-#define CONVAR_IMMUNITY_FLAG ConVars[16]
-#define CONVAR_IMMUNITY_zFLAG ConVars[17]
-#define CONVAR_FLAG_START_VOTE ConVars[4]
-#define CONVAR_START_VOTE_DELAY ConVars[9]
-#define CONVAR_START_VOTE_ENABLE ConVars[15]
-#define CONVAR_AUTHID_TYPE ConVars[18]
-#define CONVAR_ENABLE_LOGS ConVars[19]
-#define CONVAR_START_VOTE_MIN ConVars[20]
-#define CONVAR_BOT_ENABLED ConVars[21]
-#define CONVAR_ONLY_TEAMMATES ConVars[22]
-#define LOGS_ENABLED if(strlen(LogFilePath) > 0 && CONVAR_ENABLE_LOGS.IntValue > 0)
-//#define PLUGIN_DEBUG 1
-//#define PLUGIN_DEBUG_MODE 1
-enum struct ENUM_VOTE_CHOISE
-{
-	int current_type;
-	int voteban_reason;
-	char vbSteam[32];
-	char vkSteam[32];
-	char vmSteam[32];
-	char vsSteam[32];
-}
-enum struct ENUM_KICKED_PLAYERS
-{
-	int time;
-	char Steam[32];
-}
-int g_startvote_delay = 0;
-ConVar ConVars[23];
-char LogFilePath[512];
-ArrayList gReasons;
-ENUM_VOTE_CHOISE g_VoteChoise[MAXPLAYERS+1];
-ENUM_KICKED_PLAYERS g_KickedPlayers[MAXPLAYERS+1];
-#define BANSYS_BASEBANS 0
-#define BANSYS_SOURCEBANSPP 1 // Sourcebans++
-#define BANSYS_SOURCEBANSPP_COMMS 2  // Sourcebans++ Comms
-#define BANSYS_MADMIN 3 // MAdmin
-#define BANSYS_MADMIN_COMMS 4 // MAdmin Comms
-bool is_bansys[5];
-public bool detect_ban_system(int type) {
-	char filename[48], file_path[128];
-	switch(type) {
-		case BANSYS_SOURCEBANSPP: {
-			FormatEx(filename,sizeof(filename),"sbpp_main");
-		}
-		case BANSYS_SOURCEBANSPP_COMMS: {
-			FormatEx(filename,sizeof(filename),"sbpp_comms");
-		}
-		case BANSYS_MADMIN: {
-			FormatEx(filename,sizeof(filename),"materialadmin");
-		}
-		case BANSYS_MADMIN_COMMS: {
-			FormatEx(filename,sizeof(filename),"ma_basecomm");
-		}
-		default: {}
-	}
-	BuildPath(Path_SM, file_path, sizeof(file_path), "plugins/%s.smx", filename);
-	LogMessage("[GameVoting] Checking ban system: %s", file_path);
-	if(FileExists(file_path)) {
-		LogToFile(LogFilePath, "[GameVoting] Founded ban system: %s.smx", file_path);
-		is_bansys[type] = true;
-		return true;
-	}
-	return false;
-}
-
-public void loadReasons() {
-	if(gReasons != null) {
-		gReasons.Clear();
-	}
-	
-	char fFile[86];
-	BuildPath(Path_SM, fFile, sizeof(fFile), "configs/gvreasons.txt");
-
-	if(FileExists(fFile))
-	{
-		File oFile = OpenFile(fFile,"r");
-		if(oFile == null) {
-			SetFailState("I can't open file: addons/sourcemod/configs/gvreasons.txt");
-		}
-		if(FileSize(fFile) < 5) {
-			SetFailState("Please, fill this file: addons/sourcemod/configs/gvreasons.txt");
-		}
-
-		char buff[REASON_LEN];
-		int oLines = 1;
-		gReasons = new ArrayList(REASON_LEN, 0);
-		while(!IsEndOfFile(oFile))
-		{
-			if(!ReadFileLine(oFile,buff,REASON_LEN)) {
-				//SetFailState("I can't read file: addons/sourcemod/configs/gvreasons.txt");
-				continue;
-			}
-			TrimString(buff);
-			if(strlen(buff) > 1)
-			{
-				#if defined PLUGIN_DEBUG
-					LogMessage("Push reason: %s", buff);
-				#endif
-				int index = gReasons.PushString(buff);
-				LOGS_ENABLED {
-					LogToFile(LogFilePath, "Reason loaded : %s (index : %d)", buff, index);
-					PrintToServer("[GameVoting] Reason loaded : %s (index : %d)", buff, index);
-				}
-				oLines++;
-			}
-			else
-			{
-				LOGS_ENABLED {
-					// LogError("[GameVoting] Can't add reason: %s, because its smaller than 1 letters. (LINE: %d)", buff, oLines);
-					LogToFile(LogFilePath, "[Error] Can't add reason: %s, because its smaller than 1 letters. (LINE: %d)", buff, oLines);
-				}
-			}
-		}
-		oFile.Close();
-	}
-	else {
-		SetFailState("Please, create file in directory: addons/sourcemod/configs/gvreasons.txt, with reasons on one line!");
-	}
-}
-
-public void register_ConVars() {
-	// Global
-	CONVAR_VERSION = CreateConVar("sm_gamevoting_version", VERSION, "Version of gamevoting plugin. DISCORD - https://discord.gg/J7eSXuU , Author: Neatek, www.neatek.ru", FCVAR_SPONLY|FCVAR_REPLICATED|FCVAR_NOTIFY);
-	CONVAR_ENABLED = CreateConVar("gamevoting_enable", "1", "Enable/Disable plugin (def:1)", _, true, 0.0, true, 1.0);	
-	CONVAR_AUTHID_TYPE = CreateConVar("gamevoting_authid", "1", "AuthID type, 1 - AuthId_Engine, 2 - AuthId_Steam2, 3 - AuthId_Steam3, 4 - AuthId_SteamID64 (def:1)", _, true, 1.0, true, 4.0);
-	CONVAR_ENABLE_LOGS = CreateConVar("gamevoting_logs",	 "1", "Enable/Disable logs for plugin (def:1)", _, true, 0.0, true, 1.0);
-	// Min players
-	CONVAR_MIN_PLAYERS = CreateConVar("gamevoting_players",	"8", "Minimum players need to enable votes (def:8)", _, true, 0.0, true, 20.0);
-	CONVAR_AUTODISABLE = CreateConVar("gamevoting_autodisable","0", "Disable plugin when admins on server? (def:0)", _, true, 0.0, true, 1.0);
-	// Disables
-	CONVAR_BAN_ENABLE = CreateConVar("gamevoting_voteban",	"1", "Enable or disable voteban functional (def:1)", _, true, 0.0, true, 1.0);
-	CONVAR_KICK_ENABLE = CreateConVar("gamevoting_votekick",	"1", "Enable/Disable votekick (def:1)", _, true, 0.0, true, 1.0);
-	CONVAR_MUTE_ENABLE = CreateConVar("gamevoting_votemute",	"1", "Enable/Disable votemute (def:1)", _, true, 0.0, true, 1.0);
-	//CONVAR_SILENCE_ENABLE = CreateConVar("gamevoting_votesilence",	"1",	"Enable or disable silence (def:1)", _, true, 0.0, true, 1.0);
-	// Durations
-	CONVAR_BAN_DURATION = CreateConVar("gamevoting_voteban_delay", "20", "Ban duration in minutes (def:120)", _, true, 1.0, false);
-	CONVAR_KICK_DURATION = CreateConVar("gamevoting_votekick_delay", "20", "Kick duration in seconds (def:20)", _, true, 1.0, false);
-	CONVAR_MUTE_DURATION = CreateConVar("gamevoting_votemute_delay", "20", "Mute duration in minutes (def:120)", _, true, 1.0, false);
-	//CONVAR_SILENCE_DURATION = CreateConVar("gamevoting_votesilence_delay", "1", "Mute duration in minutes (def:120)", _, true, 0.0, false);
-	// Percent
-	CONVAR_BAN_PERCENT = CreateConVar("gamevoting_voteban_percent",	"80", "Needed percent of players for ban someone (def:80)", _, true, 1.0, true, 100.0);
-	CONVAR_KICK_PERCENT = CreateConVar("gamevoting_votekick_percent", "80", "Needed percent of players for kick someone (def:80)", _, true, 1.0, true, 100.0);
-	CONVAR_MUTE_PERCENT = CreateConVar("gamevoting_votemute_percent", "75", "Needed percent of players for mute someone (def:75)", _, true, 1.0, true, 100.0);
-	//CONVAR_SILENCE_PERCENT = CreateConVar("gamevoting_votesilence_percent",	 "75",	"Needed percent of players for silence someone (def:75)", _, true, 0.0, true, 100.0);
-	// ImmunityFlags
-	CONVAR_IMMUNITY_FLAG = CreateConVar("gamevoting_immunity_flag",	"a", "Immunity flag from all votes, set empty for disable immunity (def:a)");
-	CONVAR_IMMUNITY_zFLAG = CreateConVar("gamevoting_immunity_zflag", "1", "Immunity for admin flag \"z\"");
-	// StartVote
-	CONVAR_START_VOTE_ENABLE = CreateConVar("gamevoting_startvote_enable", "1", "Disable/Enable public votes (def:1)", _, true, 0.0, true, 1.0);
-	CONVAR_FLAG_START_VOTE = CreateConVar("gamevoting_startvote_flag", "", "Who can start voting for ban or something, set empty for all players (def:a)");
-	CONVAR_START_VOTE_DELAY = CreateConVar("gamevoting_startvote_delay", "20", "Delay between public votes in seconds (def:20)", _, true, 5.0, false);
-	CONVAR_START_VOTE_MIN = CreateConVar("gamevoting_startvote_min", "4", "Minimum players for start \"startvote\" feature (def:4)", _, true, 2.0);
-	CONVAR_BOT_ENABLED = CreateConVar("gamevoting_bots_enabled", "0", "Disable/Enable bots in votes (def:0)", _, true, 0.0, true, 1.0);
-	CONVAR_ONLY_TEAMMATES = CreateConVar("gamevoting_only_teammates", "0", "Disable/Enable only teammates in votes (def:0)", _, true, 0.0, true, 1.0);
-	// Listeners
-	AddCommandListener(OnClientCommands, "say");
-	AddCommandListener(OnClientCommands, "say_team");
-	// Configs&Translations
-	AutoExecConfig(true, "gamevoting");
-	LoadTranslations("gamevoting.phrases");
-}
-
-
-public int MenuHandler_Reason(Menu menu, MenuAction action, int client, int item) {
-	if(action == MenuAction_End) {
-		CloseHandle(menu);
-	}
-	else if(action == MenuAction_Select) 
-	{
-		char item1[11];
-		GetMenuItem(menu, item, item1, sizeof(item1));
-		g_VoteChoise[client].voteban_reason = StringToInt(item1); // reason from array
-		LOGS_ENABLED {
-			char reason[64];
-			if(g_VoteChoise[client].voteban_reason > -1) {
-				gReasons.GetString(g_VoteChoise[client].voteban_reason, reason, sizeof(reason));
-			}
-			PrintToServer("Player %N choised reason : %s - #%i - #%i",  client, reason, g_VoteChoise[client].voteban_reason, StringToInt(item1));
-			LogToFile(LogFilePath, "Player %N choised reason : %s - #%i - #%i",  client, reason, g_VoteChoise[client].voteban_reason, StringToInt(item1));
-		}
-		// Handle StartVote Enable/Disable
-		if(CONVAR_START_VOTE_ENABLE.IntValue > 0) {
-			ShowMenu(client, VOTE_BAN, true);
-		}
-		else {
-			ShowMenu(client, VOTE_BAN, false);
-		}
-	}
-}
-
-public void DisplayReasons(int client) {
-	Menu mReasons = CreateMenu(MenuHandler_Reason);
-	SetMenuTitle(mReasons, "[GameVoting] Reason");
-	int sSize = ((gReasons.Length)-1);
-	char buff[REASON_LEN];
-	char buff2[18];
-	for(int i = 0; i <= sSize; i++) {
-		gReasons.GetString(i, buff, sizeof(buff));
-		IntToString(i, buff2, sizeof(buff2));
-		mReasons.AddItem(buff2, buff, ITEMDRAW_DEFAULT);
-		// LOGS_ENABLED {
-		// 	PrintToServer("Display menu reason: %s - %s ", buff2, buff);
-		// }
-	}
-	DisplayMenu(mReasons, client, 0);
-}
-
-public void OnMapStart() {
-	loadReasons();
-}
-
-public void checkcommands(int client, char[] string) {
-	VALID_PLAYER {
-		#if defined PLUGIN_DEBUG_MODE
-			PrintToChatAll("checkcommands : %s", string);
-		#endif
-	
-		if(string[0] == '!' && string[1] == 'v' && string[2] == 'o' && string[3] == 't' && string[4] == 'e') {
-			CheckCommand(client, string, "!");
-		}
-		
-		else if(string[0] == '/' && string[1] == 'v' && string[2] == 'o' && string[3] == 't' && string[4] == 'e') {
-			CheckCommand(client, string, "/");
-		}
-		
-		else if(string[0] == 'v' && string[1] == 'o' && string[2] == 't' && string[3] == 'e') {
-			CheckCommand(client, string, "");
-		}
-	}
-}
-
-public Action OnClientCommands(int client, char[] command, int argc) 
-{
-	char text[32]; 
-	GetCmdArgString(text, sizeof(text));
-	StripQuotes(text);
-	checkcommands(client,text);
-	return Plugin_Continue;
-}
-
-public void OnPluginStart() {
-	ServerCommand("sv_allow_votes 0");
-	HookEvent("player_disconnect", Event_PlayerDisconnected);
-	register_ConVars();
-	GVInitLog();
-}
-
-public void OnPluginEnd() {
-	UnhookEvent("player_disconnect", Event_PlayerDisconnected);
-}
-
-public void GVInitLog() {
-	loadReasons();
-	if(CONVAR_ENABLE_LOGS.IntValue > 0) {
-		BuildPath(Path_SM, LogFilePath, sizeof(LogFilePath), "logs/gamevoting/");
-		if(!DirExists(LogFilePath)) {
-			CreateDirectory(LogFilePath, 777);
-		}
-		char ftime[68];
-		FormatTime(ftime, sizeof(ftime), "logs/gamevoting/gv%m-%d.txt",  GetTime());
-		BuildPath(Path_SM, LogFilePath, sizeof(LogFilePath), ftime);
-	}
-	detect_ban_system(BANSYS_SOURCEBANSPP);
-	detect_ban_system(BANSYS_SOURCEBANSPP_COMMS);
-	detect_ban_system(BANSYS_MADMIN);
-	detect_ban_system(BANSYS_MADMIN_COMMS);
-}
-
-public int FindFreeSlot() {
-	for(int i =0 ; i <= MAXPLAYERS; i ++) {
-		if(g_KickedPlayers[i].time == 0) {
-			return i;
-		} else if(g_KickedPlayers[i].time < GetTime()) {
-			g_KickedPlayers[i].time = 0;
-		}
-	}
-	return -1;
-}
-
-
-public bool IsAdmin(int client)
-{
-	AdminId admin = GetUserAdmin(client);
-	if(admin == INVALID_ADMIN_ID)
-		return false;
-	return GetAdminFlag(admin, Admin_Generic);
-}
-
-
-public bool adminsonserver()
-{
-	for(int i=0; i < MaxClients; ++i) {
-		if(IsCorrectPlayer(i)) {
-			if(IsAdmin(i))
-				return true;
-		}
-	}
-	return false;
-}
+#include "gamevoting/defines.sp"
+#include "gamevoting/globals.sp"
+#include "gamevoting/logs.sp"
+#include "gamevoting/functions.sp"
+#include "gamevoting/reasons.sp"
+#include "gamevoting/detect.sp"
+#include "gamevoting/commands.sp"
+#include "gamevoting/events.sp"
+#include "gamevoting/cvars.sp"
 
 
 public void ClearVotesForClient(int client, int type) {
@@ -414,6 +64,7 @@ public void ClearVotesForClient(int client, int type) {
 	}
 }
 
+
 public void PushKickedPlayer(int client) {
 	VALID_PLAYER {
 		int slot = FindFreeSlot();
@@ -434,6 +85,7 @@ public void PushKickedPlayer(int client) {
 	}
 	
 }
+
 
 public int KickedPlayer(int client) {
 	VALID_PLAYER {
@@ -460,17 +112,6 @@ public int KickedPlayer(int client) {
 	return 0;
 }
 
-public void OnClientPostAdminCheck(int client) {
-	VALID_PLAYER {
-		int wait = KickedPlayer(client);
-		#if defined PLUGIN_DEBUG_MODE
-			LogMessage("Kicked wait : %d", wait);
-		#endif
-		if(wait > 0) {
-			KickClient(client, "Kicked by GameVoting (Wait: %d sec)", wait);
-		}
-	}
-}
 
 public int GetCountVotes(int client, int type) {
 
@@ -524,6 +165,7 @@ public int GetCountVotes(int client, int type) {
 	return 0;
 }
 
+
 public void ClearChoise(int client) {
 	strcopy(VAR_VOTEBAN, 32, "");
 	strcopy(VAR_VOTEKICK, 32, "");
@@ -531,6 +173,7 @@ public void ClearChoise(int client) {
 	g_VoteChoise[client].voteban_reason = 0;
 	//strcopy(VAR_VOTESILENCE, 32, "");
 }
+
 
 public int GetCountNeeded(int type) {
 	int players = CountPlayers();
@@ -554,6 +197,7 @@ public int GetCountNeeded(int type) {
 	}
 	// return -1;
 }
+
 
 public void SetChoise(int type, int client, int target) {
 	VALID_PLAYER {
@@ -642,218 +286,52 @@ public void SetChoise(int type, int client, int target) {
 	}
 }
 
-public int CountPlayers() {
-	int output = 0;
-	
-	for(int i = 1; i <= MaxClients; i++) 
-		if(IsCorrectPlayer(i) && !HasImmunity(i)) 
-			output++;
-	
-	return output;
-}
-
-public int CountPlayers_withoutImmunity() {
-	int output = 0;
-	
-	for(int i = 1; i <= MaxClients; i++) 
-		if(IsCorrectPlayer(i)) 
-			output++;
-	
-	return output;
-}
-
-// Function for check is valid or not player
-public bool IsCorrectPlayer(int client) {
-	if(client > 4096) {
-		client = EntRefToEntIndex(client);
-	}
-		
-	if( (client < 1 || client > MaxClients) || !IsClientConnected(client) ||  !IsClientInGame( client ) ) {
-		return false;
-	}
-	
-	if(CONVAR_BOT_ENABLED.IntValue < 1) {
-		if(IsFakeClient(client) || IsClientSourceTV(client)) {
-			return false;
-		}
-	}
-	
-	return true;
-}
-
-// Great event for storing data
-public Action Event_PlayerDisconnected(EVENT_PARAMS) 
-{
-	int client = EVENT_GET_PLAYER
-	VALID_PLAYER {
-		ClearChoise(client);
-		// valid player
-		#if defined PLUGIN_DEBUG_MODE
-			LogMessage("%N player disconnected", client);
-		#endif
-	}
-}
-
-// Check commands
-public void CheckCommand(int client, const char[] args, const char[] pref) {
-	
-	char command[24];
-	strcopy(command, sizeof(command), args);
-	TrimString(command);
-	
-	#if defined PLUGIN_DEBUG_MODE
-		PrintToChatAll("CheckCommand : %s", command);
-	#endif
-	
-	if(strlen(pref) > 0) {
-		ReplaceString(command, sizeof(command), pref, "", true);
-	}
-	
-	if(CONVAR_ENABLED.IntValue < 1) {
-		return;
-	}
-
-	if(CountPlayers_withoutImmunity() < CONVAR_MIN_PLAYERS.IntValue) {
-		//PrintToChat(client, "[GameVoting] Minimum players for voting - %d.", CONVAR_MIN_PLAYERS.IntValue);
-		PrintToChat(client, "\x04[GameVoting]\x01 %t", "gv_min_players", CONVAR_MIN_PLAYERS.IntValue);
-		return;
-	}
-	
-	if(CONVAR_AUTODISABLE.IntValue > 0) {
-		if(adminsonserver()) {
-			return;
-		}
-	}
-	
-	if(StrEqual(command, BAN_COMMAND, false)) {
-		if(CONVAR_BAN_ENABLE.IntValue < 1) {
-			return;
-		}
-	
-		DisplayReasons(client);
-		//ShowMenu(client,VOTE_BAN,false);
-		return;
-	}
-	
-	if(StrEqual(command, KICK_COMMAND, false)) {
-		if(CONVAR_KICK_ENABLE.IntValue < 1) {
-			return;
-		}
-	
-		ShowMenu(client,VOTE_KICK,false);
-		return;
-	}
-	
-	if(StrEqual(command, MUTE_COMMAND, false)) {
-		if(CONVAR_MUTE_ENABLE.IntValue < 1) {
-			return;
-		}
-	
-		ShowMenu(client,VOTE_MUTE,false);
-		return;
-	}
-	
-	/*if(StrEqual(command, SILENCE_COMMAND, false)) {
-		if(CONVAR_SILENCE_ENABLE.IntValue < 1) {
-			return;
-		}
-	
-		ShowMenu(client,VOTE_SILENCE);
-		return;
-	}*/
-}
 
 public bool StartVoteFlag(int client) {
 
 	char s_flag[11];
 	GetConVarString(CONVAR_FLAG_START_VOTE, s_flag, sizeof(s_flag));
-
 	if(CONVAR_START_VOTE_ENABLE.IntValue < 1) {
 		return false;
 	}
-
 	if(g_startvote_delay > GetTime() && CONVAR_START_VOTE_ENABLE.IntValue > 0 ) {
 		//PrintToChat(client, "[GameVoting] Please wait %dsec before start public vote.", ((g_startvote_delay)-GetTime()) );
 		PrintToChat(client, "\x04[GameVoting]\x01 %t", "gv_wait_before_startvote", ((g_startvote_delay)-GetTime()));
 		return false;
 	}
-
 	if(strlen(s_flag) < 1) {
 		return true;
 	}
-	
 	int b_flags = ReadFlagString(s_flag);
 	if ((GetUserFlagBits(client) & b_flags) == b_flags) {
 		return true;
 	}
-	
 	return false;
 }
 
-public bool HasImmunity(int client) {
-	char s_flag[11];
-	GetConVarString(CONVAR_IMMUNITY_FLAG, s_flag, sizeof(s_flag));
-	
-	if(strlen(s_flag) < 1) {
-		return false;
-	}
-	
-	int b_flags = ReadFlagString(s_flag);
-
-	if ((GetUserFlagBits(client) & b_flags) == b_flags) {
-		return true;
-	}
-	if(CONVAR_IMMUNITY_zFLAG.IntValue > 0) {
-		if (GetUserFlagBits(client) & ADMFLAG_ROOT) {
-			return true;
-		}
-	}
-
-	return false;
-	//CONVAR_IMMUNITY_FLAG
-}
 
 // Show ban&kick&mute&silence menu
 public void ShowMenu(int client, int type, bool startvote_force) {
-
 	VALID_PLAYER {
-	
 		if(CountPlayers_withoutImmunity() < 1)
 			return;
-	
 		VAR_CTYPE = type;
-		
 		Menu mymenu;
-		
-		//if(!StartVoteFlag(client)) {
 		if(!startvote_force) {
 			mymenu = new Menu(menu_handler);
 		}
 		else {
 			mymenu = new Menu(startvote_menu_player_handler);
 		}
-
-		//}
-		//else {
-		//	//CONVAR_START_VOTE_MIN
-		//	if(CONVAR_START_VOTE_ENABLE.IntValue > 0)
-		//		mymenu = new Menu(startvote_menu_player_handler);
-		//	else
-		//		mymenu = new Menu(menu_handler);
-		//}
-
 		char s_mtitle[48];
 		switch(type) {
 			case VOTE_BAN: {
-				//mymenu.SetTitle("GAMEVOTING - BAN");
 				Format(s_mtitle, sizeof(s_mtitle), "GAMEVOTING - %T", "gv_ban_title", client);
 			}
 			case VOTE_KICK: {
-				//mymenu.SetTitle("GAMEVOTING - KICK");
 				Format(s_mtitle, sizeof(s_mtitle), "GAMEVOTING - %T", "gv_kick_title", client);
 			}
 			case VOTE_MUTE: {
-				//mymenu.SetTitle("GAMEVOTING - MUTE");
 				Format(s_mtitle, sizeof(s_mtitle), "GAMEVOTING - %T", "gv_mute_title", client);
 			}
 			//case VOTE_SILENCE: {
@@ -866,9 +344,6 @@ public void ShowMenu(int client, int type, bool startvote_force) {
 		}
 		
 		mymenu.SetTitle(s_mtitle);
-		
-		//mymenu.AddItem("-1", "\nSELECT TARGET PLAYER", ITEMDRAW_RAWLINE|ITEMDRAW_DISABLED);
-
 		char Name[48], id[11];
 		for(int target=0;target<MaxClients;target++) {
 			VALID_TARGET {
@@ -890,6 +365,7 @@ public void ShowMenu(int client, int type, bool startvote_force) {
 		mymenu.Display(client, MENU_TIME_FOREVER);
 	}
 }
+
 
 public void StartVote(int client, int target, int type) {
 
@@ -995,6 +471,7 @@ public void StartVote(int client, int target, int type) {
 	} }
 }
 
+
 // startvote_menu_handler
 public int startvote_menu_player_handler(Menu menu, MenuAction action, int client, int item) {
 
@@ -1009,6 +486,7 @@ public int startvote_menu_player_handler(Menu menu, MenuAction action, int clien
 		CloseHandle(menu);
 	}
 }
+
 
 // action startvote
 public int menu_startvote_action_handler(Menu menu, MenuAction action, int client, int item) {
@@ -1031,6 +509,7 @@ public int menu_startvote_action_handler(Menu menu, MenuAction action, int clien
 	}
 }
 
+
 // Menu callback
 public int menu_handler(Menu menu, MenuAction action, int client, int item) {
 	if (action == MenuAction_Select) {
@@ -1046,36 +525,6 @@ public int menu_handler(Menu menu, MenuAction action, int client, int item) {
 	}
 }
 
-public void player_steam(int client, char[] steam_id, int size) {
-	char auth[32];
-	switch(CONVAR_AUTHID_TYPE.IntValue)
-	{
-		case 1: {
-			if(GetClientAuthId(client, AuthId_Engine, auth, sizeof(auth))) {
-				Format(steam_id,size,auth);
-			}
-				
-		}
-		case 2: {
-			if(GetClientAuthId(client, AuthId_Steam2, auth, sizeof(auth))) {
-				Format(steam_id,size,auth);
-			}
-				
-		}
-		case 3:  {
-			if(GetClientAuthId(client, AuthId_Steam3, auth, sizeof(auth))) {
-				Format(steam_id,size,auth);
-			}
-				
-		}
-		case 4:  {
-			if(GetClientAuthId(client, AuthId_SteamID64, auth, sizeof(auth))) {
-				Format(steam_id,size,auth);
-			}
-				
-		}
-	}
-}
 
 public void DoAction(int client, int type, int last) {
 	
@@ -1088,7 +537,7 @@ public void DoAction(int client, int type, int last) {
 				player_steam(client, auth, sizeof(auth));
 				LogToFile(LogFilePath, "Player %N(%s) was banned by voting. (Last voted player: %N)",  client, auth,last);
 			}
-			//int reason_num = HasReason(last);
+
 			char reason[64];
 			if(g_VoteChoise[last].voteban_reason > -1) {
 				gReasons.GetString(g_VoteChoise[last].voteban_reason, reason, sizeof(reason));
@@ -1160,20 +609,4 @@ public void DoAction(int client, int type, int last) {
 		}
 	}
 	
-}
-
-public int HasReason(int target) {
-	char auth[32];
-	player_steam(target, auth, sizeof(auth));
-	for(int i =0 ; i <= MAXPLAYERS; i ++) {
-		/*Find steamid in array*/
-		/*VAR_IVOTEBAN g_VoteChoise[i].vbSteam*/
-		if(StrEqual(VAR_IVOTEBAN,auth,true)) {
-			if(g_VoteChoise[i].voteban_reason > 0) {
-				return g_VoteChoise[i].voteban_reason;
-			}
-		}
-	}
-		
-	return -1;
 }
