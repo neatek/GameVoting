@@ -1096,27 +1096,32 @@ public void DoAction(int client, int type, int last) {
 			else {
 				strcopy(reason, sizeof(reason), "Empty reason");
 			}
+
 			if(is_bansys[BANSYS_SOURCEBANSPP]) 
 			{
 				char reasonstring[68];
 				Format(reasonstring, sizeof(reasonstring), "Gamevoting (%N)(%s)", last, reason);
 				SBPP_BanPlayer(0, client, CONVAR_BAN_DURATION.IntValue, reasonstring);
-			} 
+				LOGS_ENABLED {
+					LogToFile(LogFilePath, "[sbpp_main.smx] Banning %N player by: SBPP_BanPlayer(0, %d, %d, %s)", client, client, CONVAR_BAN_DURATION.IntValue, reasonstring);
+				}
+			}
 			else if(is_bansys[BANSYS_MADMIN]) 
 			{
 				char reasonstring[68];
 				Format(reasonstring, sizeof(reasonstring), "Gamevoting (%N)(%s)", last, reason);
 				MABanPlayer(0, client, 1, CONVAR_BAN_DURATION.IntValue, reasonstring);
-			} 
+				LOGS_ENABLED {
+					LogToFile(LogFilePath, "[materialadmin.smx] Banning %N player by: MABanPlayer(0, %d, 1, %d, %s)", client, client, CONVAR_BAN_DURATION.IntValue, reasonstring);
+				}
+			}
 			else 
 			{
 				ServerCommand("sm_ban #%d %d \"Gamevoting (%N)(%s)\"", GetClientUserId(client), CONVAR_BAN_DURATION.IntValue, last, reason);
+				LOGS_ENABLED {
+					LogToFile(LogFilePath, "[BaseBans] Server command: sm_ban #%d %d \"Gamevoting (%N)(%s)\"", GetClientUserId(client), CONVAR_BAN_DURATION.IntValue, last, reason);
+				}
 			}
-
-			LOGS_ENABLED {
-				LogToFile(LogFilePath, "Server command: sm_ban #%d %d \"Gamevoting (%N)(%s)\"", GetClientUserId(client), CONVAR_BAN_DURATION.IntValue, last, reason);
-			}
-
 			/*KickClient(client, "Banned by GameVoting (%s)", reason);*/
 		}
 		case VOTE_KICK: {
@@ -1152,8 +1157,6 @@ public void DoAction(int client, int type, int last) {
 			else {
 			 	ServerCommand("sm_silence #%d %d \"Muted by Gamevoting (%N)\"", GetClientUserId(client), CONVAR_MUTE_DURATION.IntValue, last);
 			}
-			
-
 		}
 	}
 	
