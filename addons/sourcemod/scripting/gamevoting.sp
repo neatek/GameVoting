@@ -176,7 +176,8 @@ public void ClearChoise(int client) {
 
 
 public int GetCountNeeded(int type) {
-	int players = CountPlayers();
+	//int players = CountPlayers();
+	int players = CountPlayers_withoutImmunity();
 	switch(type) {
 		case VOTE_BAN: {
 			return ((players * CONVAR_BAN_PERCENT.IntValue) / 100);
