@@ -18,7 +18,7 @@ public bool detect_ban_system(int type) {
 	BuildPath(Path_SM, file_path, sizeof(file_path), "plugins/%s.smx", filename);
 	LogMessage("[GameVoting] Checking ban system: %s", file_path);
 	if(FileExists(file_path)) {
-		LogToFile(LogFilePath, "[GameVoting] Founded ban system: %s.smx", file_path);
+		LogToFile(LogFilePath, "[GameVoting] Founded ban system: %s", file_path);
 		is_bansys[type] = true;
 		return true;
 	}
